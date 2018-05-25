@@ -36,20 +36,18 @@ public class CommunicationHandler extends Thread {
     }
 
     public void addConnection(Socket socket){
-        synchronized (connections) {
-            ArrayList<Pedestrian> list = new ArrayList<Pedestrian>();
+        ArrayList<Pedestrian> list = new ArrayList<Pedestrian>();
+        for(int i = 0; i < 3; i++){
             Pedestrian pedestrian = new Pedestrian();
-            /*for(int i = 0; i < 3; i++){
-                Pedestrian pedestrian = new Pedestrian();
-                list.add(pedestrian);
-            }*/
-
-            Connection connection = new Connection(socket,pedestrian);
+            list.add(pedestrian);
+        }
+        synchronized (connections) {
+            Connection connection = new Connection(socket, list);
             connections.add(connection);
             //threadPool.submit(connection);
-        }
-        if(connections.size() > 2 && !this.isAlive()) {
-            this.start();
+
+            if (connections.size() > 2 && !this.isAlive())
+                this.start();
         }
     }
 }

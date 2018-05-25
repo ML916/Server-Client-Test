@@ -23,16 +23,16 @@ public class Client {
             System.out.println("Connection with server established");
             while(true) {
                 objectInputStream = new ObjectInputStream(socket.getInputStream());
-                pedestrian = (Pedestrian) objectInputStream.readObject();
-                //pedestrianList = (ArrayList<Pedestrian>) objectInputStream.readObject();
-                //this.pedestrianList.forEach(Pedestrian::modifyObject);
+                pedestrianList = (ArrayList<Pedestrian>) objectInputStream.readObject();
 
-                System.out.println("ID from received object:" + pedestrian.id + " Position: " + pedestrian.getPosition());
-                pedestrian.modifyObject();
-                //this.pedestrianList.forEach(Pedestrian::modifyObject);
+                for(Pedestrian p: this.pedestrianList){
+                    System.out.println("Received object with ID:" + p.id + " Position: " + p.getPosition());
+                }
+
+                this.pedestrianList.forEach(Pedestrian::modifyObject);
+
                 objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-                objectOutputStream.writeObject(pedestrian);
-                //objectOutputStream.writeObject(pedestrianList);
+                objectOutputStream.writeObject(pedestrianList);
             }
         } catch (IOException e) {
             e.printStackTrace();

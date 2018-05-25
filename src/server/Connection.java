@@ -36,15 +36,12 @@ public class Connection implements Runnable {
         //System.out.println("Running connection");
         try {
             outputStream = new ObjectOutputStream(socket.getOutputStream());
-            System.out.println("ID of sent object: " + pedestrian.id + " Position: " + pedestrian.getPosition());
-            /*for (Pedestrian p: this.pedestrianList) {
+            for (Pedestrian p: this.pedestrianList) {
                 System.out.println("Sending object: ID: " + p.id + " Pos: "+ p.getPosition());
-            }*/
-            outputStream.writeObject(pedestrian);
-            //outputStream.writeObject(pedestrianList);
+            }
+            outputStream.writeObject(pedestrianList);
             inputStream = new ObjectInputStream(socket.getInputStream());
-            pedestrian = (Pedestrian) inputStream.readObject();
-            //pedestrianList = (ArrayList<Pedestrian>) inputStream.readObject();
+            pedestrianList = (ArrayList<Pedestrian>) inputStream.readObject();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
