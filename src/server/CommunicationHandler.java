@@ -22,10 +22,11 @@ public class CommunicationHandler extends Thread {
     public void run() {
         while(true) {
             synchronized (connections) {
-                for (Connection connection : this.connections) {
-                    connection.run();
+                try {
+                    List<Future<String>> futures = threadPool.invokeAll(connections);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                //List<Future<Connection>> futures = threadPool.invokeAll(connections);
             }
             try {
                 this.sleep(1000);
@@ -37,14 +38,16 @@ public class CommunicationHandler extends Thread {
 
     public void addConnection(Socket socket){
         ArrayList<Pedestrian> list = new ArrayList<Pedestrian>();
+
         for(int i = 0; i < 3; i++){
-            Pedestrian pedestrian = new Pedestrian();
+            Pedestrian pedestrian = new Pedestrian(i,i);
             list.add(pedestrian);
         }
+
         synchronized (connections) {
+
             Connection connection = new Connection(socket, list);
             connections.add(connection);
-            //threadPool.submit(connection);
 
             if (connections.size() > 2 && !this.isAlive())
                 this.start();

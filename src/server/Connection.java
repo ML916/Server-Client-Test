@@ -7,24 +7,11 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
-public class Connection implements Runnable {
-    private Pedestrian pedestrian;
+public class Connection implements Callable<String> {
     private ArrayList<Pedestrian> pedestrianList;
     private Socket socket;
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
-
-    public Connection(Socket socket){
-        this.pedestrian = new Pedestrian();
-        this.socket = socket;
-        this.pedestrianList = new ArrayList<Pedestrian>();
-    }
-
-    public Connection(Socket socket, Pedestrian pedestrian) {
-        this.socket = socket;
-        this.pedestrian = pedestrian;
-        this.pedestrianList = new ArrayList<Pedestrian>();
-    }
 
     public Connection(Socket socket, ArrayList<Pedestrian> list){
         this.socket = socket;
@@ -32,8 +19,7 @@ public class Connection implements Runnable {
     }
 
     @Override
-    public void run() {
-        //System.out.println("Running connection");
+    public String call() throws Exception {
         try {
             outputStream = new ObjectOutputStream(socket.getOutputStream());
             for (Pedestrian p: this.pedestrianList) {
@@ -42,11 +28,12 @@ public class Connection implements Runnable {
             outputStream.writeObject(pedestrianList);
             inputStream = new ObjectInputStream(socket.getInputStream());
             pedestrianList = (ArrayList<Pedestrian>) inputStream.readObject();
+            return Thread.currentThread().getName();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-
+        return null;
     }
 }
