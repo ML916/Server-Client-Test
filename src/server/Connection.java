@@ -23,7 +23,7 @@ public class Connection implements Callable<String> {
         try {
             outputStream = new ObjectOutputStream(socket.getOutputStream());
             for (Pedestrian p: this.pedestrianList) {
-                System.out.println("Sending object: ID: " + p.id + " Pos: "+ p.getPosition());
+                System.out.println("Sending object: ID: " + p.ID + " Pos: "+ p.getPosition());
             }
             outputStream.writeObject(pedestrianList);
             inputStream = new ObjectInputStream(socket.getInputStream());

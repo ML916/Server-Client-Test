@@ -1,5 +1,6 @@
 package klient;
 
+import server.Corridor;
 import server.Pedestrian;
 
 import java.io.IOException;
@@ -26,11 +27,11 @@ public class Client {
                 pedestrianList = (ArrayList<Pedestrian>) objectInputStream.readObject();
 
                 for(Pedestrian p: this.pedestrianList){
-                    System.out.println("Received object with ID:" + p.id + " Position: " + p.getPosition());
+                    System.out.println("Received object with ID:" + p.ID + " Position: " + p.getPosition());
                 }
 
                 this.pedestrianList.forEach(Pedestrian::modifyObject);
-
+                //this.pedestrianList.forEach(Pedestrian::move(Corridor));
                 objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
                 objectOutputStream.writeObject(pedestrianList);
             }

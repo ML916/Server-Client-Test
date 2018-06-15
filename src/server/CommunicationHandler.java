@@ -11,11 +11,19 @@ public class CommunicationHandler extends Thread {
 
     private ArrayList<Connection> connections;
     private ExecutorService threadPool;
+    private Corridor corridor;
+
 
     public CommunicationHandler() {
         connections = new ArrayList<Connection>();
         threadPool = Executors.newCachedThreadPool();
         //this.start();
+    }
+
+    public CommunicationHandler(Corridor corridor){
+        this.corridor = corridor;
+        threadPool = Executors.newCachedThreadPool();
+        connections = new ArrayList<Connection>();
     }
 
     @Override
@@ -45,7 +53,6 @@ public class CommunicationHandler extends Thread {
         }
 
         synchronized (connections) {
-
             Connection connection = new Connection(socket, list);
             connections.add(connection);
 
