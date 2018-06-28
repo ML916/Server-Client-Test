@@ -20,7 +20,6 @@ public class ServerWindow extends Application {
 
         //primaryStage.setOnCloseRequest(event -> System.out.println("Closing window"));
         //primaryStage.setOnCloseRequest(event -> server.toggleIsServerOn());
-
         primaryStage.setTitle("Server Window");
         primaryStage.setScene(new Scene(root, 1280, 720));
         primaryStage.show();

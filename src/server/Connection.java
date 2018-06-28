@@ -1,5 +1,7 @@
 package server;
 
+import model.Corridor;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -12,22 +14,33 @@ public class Connection implements Callable<String> {
     private Socket socket;
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
+    private Corridor corridor;
 
-    public Connection(Socket socket, ArrayList<Pedestrian> list){
+    public Connection(Socket socket, Corridor corridor){
         this.socket = socket;
-        this.pedestrianList = list;
+        this.corridor = corridor;
+        this.pedestrianList = new ArrayList<>();
     }
 
     @Override
     public String call() throws Exception {
         try {
             outputStream = new ObjectOutputStream(socket.getOutputStream());
-            for (Pedestrian p: this.pedestrianList) {
-                System.out.println("Sending object: ID: " + p.ID + " Pos: "+ p.getPosition());
+            synchronized (corridor){
+                outputStream.writeObject(corridor);
             }
-            outputStream.writeObject(pedestrianList);
             inputStream = new ObjectInputStream(socket.getInputStream());
             pedestrianList = (ArrayList<Pedestrian>) inputStream.readObject();
+            
+            for(Pedestrian pedestrian : pedestrianList){
+                if(corridor.pedestrianList.contains(pedestrian)){
+                    corridor.pedestrianList.set(corridor.pedestrianList.indexOf(pedestrian), pedestrian);
+                }
+            }
+
+            pedestrianList.clear();
+            System.out.println("Call completed");
+            fireCorridorChangeEvent();
             return Thread.currentThread().getName();
         } catch (IOException e) {
             e.printStackTrace();
@@ -35,5 +48,9 @@ public class Connection implements Callable<String> {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void fireCorridorChangeEvent(){
+
     }
 }

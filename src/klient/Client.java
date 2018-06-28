@@ -1,6 +1,6 @@
 package klient;
 
-import server.Corridor;
+import model.Corridor;
 import server.Pedestrian;
 
 import java.io.IOException;
@@ -16,24 +16,26 @@ public class Client {
     private ObjectOutputStream objectOutputStream;
     private Pedestrian pedestrian;
     private ArrayList<Pedestrian> pedestrianList;
+    private Corridor corridor;
 
     public Client(){
         try {
             InetAddress address = InetAddress.getByName("localhost");
             socket = new Socket(address, 11111);
             System.out.println("Connection with server established");
+            pedestrianList = new ArrayList<>();
             while(true) {
                 objectInputStream = new ObjectInputStream(socket.getInputStream());
-                pedestrianList = (ArrayList<Pedestrian>) objectInputStream.readObject();
+                corridor = (Corridor) objectInputStream.readObject();
 
-                for(Pedestrian p: this.pedestrianList){
-                    System.out.println("Received object with ID:" + p.ID + " Position: " + p.getPosition());
+                for (Pedestrian p: corridor.getPedestrianList()) {
+                    p.move(corridor);
+                    pedestrianList.add(p);
                 }
 
-                this.pedestrianList.forEach(Pedestrian::modifyObject);
-                //this.pedestrianList.forEach(Pedestrian::move(Corridor));
                 objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
                 objectOutputStream.writeObject(pedestrianList);
+                pedestrianList.clear();
             }
         } catch (IOException e) {
             e.printStackTrace();

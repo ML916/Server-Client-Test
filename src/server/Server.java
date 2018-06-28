@@ -1,5 +1,7 @@
 package server;
 
+import model.Corridor;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,7 +9,7 @@ import java.net.Socket;
 public class Server extends Thread {
     private boolean isServerOn = true;
     private ServerSocket serverSocket;
-    private CommunicationHandler communicationHandler;
+    public CommunicationHandler communicationHandler;
     private Corridor corridor;
 
     public boolean isServerOn() {
@@ -16,6 +18,7 @@ public class Server extends Thread {
 
     public void toggleIsServerOn(){
         this.isServerOn = !isServerOn;
+        System.out.println("toggle is server on: " + isServerOn);
     }
 
     public Corridor getCorridor() {
@@ -24,14 +27,20 @@ public class Server extends Thread {
 
     public Server(){
         super();
-        this.corridor = new Corridor(12,300, 200);
+        this.corridor = new Corridor(16,300, 200);
+        this.isServerOn = true;
         try {
             serverSocket = new ServerSocket(11111);
-            communicationHandler = new CommunicationHandler();
+            communicationHandler = new CommunicationHandler(corridor);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.start();
+        //this.start();
+    }
+
+    public Server(Corridor corridor){
+        this();
+        this.corridor = corridor;
     }
 
     public void run(){
@@ -46,9 +55,9 @@ public class Server extends Thread {
             }
         }
         System.out.println("Server: run should be closed now");
+        communicationHandler.toggleIsConnectionActive();
         try {
             serverSocket.close();
-            communicationHandler.interrupt();
         } catch (IOException e) {
             e.printStackTrace();
         }

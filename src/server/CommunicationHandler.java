@@ -1,18 +1,21 @@
 package server;
 
+import model.Corridor;
+import model.CorridorListener;
+
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class CommunicationHandler extends Thread {
 
     private ArrayList<Connection> connections;
+    private List<CorridorListener> listeners = new ArrayList<CorridorListener>();
     private ExecutorService threadPool;
     private Corridor corridor;
-
+    private boolean isConnectionActive = true;
 
     public CommunicationHandler() {
         connections = new ArrayList<Connection>();
@@ -21,21 +24,26 @@ public class CommunicationHandler extends Thread {
     }
 
     public CommunicationHandler(Corridor corridor){
+        this();
         this.corridor = corridor;
-        threadPool = Executors.newCachedThreadPool();
-        connections = new ArrayList<Connection>();
+    }
+
+    public void toggleIsConnectionActive(){
+        this.isConnectionActive = !isConnectionActive;
     }
 
     @Override
     public void run() {
-        while(true) {
-            synchronized (connections) {
+        while(isConnectionActive) {
                 try {
-                    List<Future<String>> futures = threadPool.invokeAll(connections);
+                    synchronized (connections) {
+                        /*List<Future<String>> futures = */
+                        threadPool.invokeAll(connections);
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }
+            fireCorridorChangeEvent();
             try {
                 this.sleep(1000);
             } catch (InterruptedException e) {
@@ -44,20 +52,29 @@ public class CommunicationHandler extends Thread {
         }
     }
 
-    public void addConnection(Socket socket){
-        ArrayList<Pedestrian> list = new ArrayList<Pedestrian>();
-
-        for(int i = 0; i < 3; i++){
-            Pedestrian pedestrian = new Pedestrian(i,i);
-            list.add(pedestrian);
+    private void fireCorridorChangeEvent(){
+        synchronized (corridor){
+            for (CorridorListener listener: listeners) {
+                listener.onCorridorChange();
+            }
         }
+    }
 
+    public void addConnection(Socket socket){
         synchronized (connections) {
-            Connection connection = new Connection(socket, list);
+            Connection connection;
+            synchronized (corridor){
+              connection = new Connection(socket, corridor);
+            }
             connections.add(connection);
 
-            if (connections.size() > 2 && !this.isAlive())
+            //if (connections.size() > 2 && !this.isAlive())
+            if(!this.isAlive())
                 this.start();
         }
+    }
+
+    public void addListener(CorridorListener listener){
+        listeners.add(listener);
     }
 }
