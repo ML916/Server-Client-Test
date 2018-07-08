@@ -9,6 +9,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.StrokeType;
 import model.CorridorListener;
 
 public class ServerController {
@@ -18,15 +20,12 @@ public class ServerController {
     public Button firstButton;
 
     private ObservableList<Circle> circles = FXCollections.observableArrayList();
-    private ObservableList<Pedestrian> pedestrians;
 
     public void initModel(Server server){
         this.server = server;
         server.communicationHandler.addListener(() -> updateCorridorCanvas());
         this.server.start();
-        pedestrians = FXCollections.observableList(this.server.getCorridor().getPedestrianList());
-
-        //this.server.getCorridor().getPedestrianList().add(new Pedestrian(2,2));
+        goalRectangleSetup();
 
         circles.addListener((ListChangeListener<Circle>) c->  {
             while(c.next()) {
@@ -41,16 +40,37 @@ public class ServerController {
                 }
             }
         });
-        server.getCorridor().getPedestrianList().forEach(p ->
-                circles.add(p.circle));
+        updateCorridorCanvas();
+    }
+
+    private void goalRectangleSetup(){
+        Rectangle corridorRectangle = new Rectangle(server.getCorridor().getWidth(),server.getCorridor().getHeight(),Color.WHITE);
+        corridorRectangle.setX(0);
+        corridorRectangle.setX(0);
+        corridorRectangle.setStroke(Color.BLACK);
+        corridorRectangle.setStrokeType(StrokeType.CENTERED);
+        corridorRectangle.setStrokeWidth(1.0);
+        canvasPane.getChildren().add(corridorRectangle);
+
+        Rectangle blueRectangle = new Rectangle(
+                10,server.getCorridor().getHeight(), Color.BLUEVIOLET);
+        blueRectangle.setX(0);
+        blueRectangle.setY(0);
+        canvasPane.getChildren().add(blueRectangle);
+
+        Rectangle redRectangle = new Rectangle(
+                10,server.getCorridor().getHeight(),Color.ORANGERED);
+        redRectangle.setX(server.getCorridor().getWidth()-10);
+        redRectangle.setY(0);
+        canvasPane.getChildren().add(redRectangle);
     }
 
     private void updateCorridorCanvas(){
         Platform.runLater(() -> {
             circles.clear();
+            System.out.println("Update corridor canvas är igång");
             server.getCorridor().getPedestrianList().forEach(p ->
                     circles.add(p.circle));
         });
-
     }
 }
