@@ -18,10 +18,8 @@ public class ServerWindow extends Application {
         Server server = new Server();
         controller.initModel(server);
 
-        //primaryStage.setOnCloseRequest(event -> System.out.println("Closing window"));
-        //primaryStage.setOnCloseRequest(event -> server.toggleIsServerOn());
         primaryStage.setTitle("Server Window");
-        primaryStage.setScene(new Scene(root, 1280, 720));
+        primaryStage.setScene(new Scene(root, server.getCorridor().getWidth(),server.getCorridor().getHeight()));
         primaryStage.show();
     }
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.image.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
@@ -10,9 +11,29 @@
 
 <BorderPane fx:id="mainBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: grey;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="server.ServerController">
    <center>
-      <Pane fx:id="canvasPane" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER" />
+      <Pane fx:id="canvasPane" prefHeight="299.0" prefWidth="544.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER" />
    </center>
+   <top>
+      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox prefHeight="200.0" prefWidth="100.0">
+               <children>
+                  <Label text="Simulation progress:" />
+                  <ProgressIndicator fx:id="progressIndicator" prefHeight="81.0" prefWidth="143.0" progress="0.0" />
+               </children>
+            </VBox>
+            <Label text="Label" />
+            <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" />
+         </children>
+      </HBox>
+   </top>
    <right>
-      <Button fx:id="firstButton" mnemonicParsing="false" text="Button" BorderPane.alignment="CENTER" />
+      <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="startButton" layoutX="74.0" layoutY="23.0" mnemonicParsing="false" onAction="#onStartButtonAction" prefHeight="25.0" prefWidth="53.0" text="Start" />
+            <Button fx:id="pauseButton" layoutX="74.0" layoutY="122.0" mnemonicParsing="false" onAction="#onPauseButtonAction" prefHeight="25.0" prefWidth="56.0" text="Pause" />
+            <Button fx:id="stopButton" layoutX="74.0" layoutY="72.0" mnemonicParsing="false" onAction="#onStopButtonAction" prefHeight="25.0" prefWidth="56.0" text="Stop" />
+         </children>
+      </Pane>
    </right>
 </BorderPane>

@@ -4,26 +4,45 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
-import model.CorridorListener;
 
 public class ServerController {
     public Server server;
     public BorderPane mainBorderPane;
     public Pane canvasPane;
-    public Button firstButton;
+
+    public ProgressIndicator progressIndicator;
+    public ProgressBar progressBar;
+
+    public Button startButton;
+    public Button pauseButton;
+    public Button stopButton;
 
     private ObservableList<Circle> circles = FXCollections.observableArrayList();
 
     public void initModel(Server server){
         this.server = server;
-        server.communicationHandler.addListener(() -> updateCorridorCanvas());
+        /*server.simulationHandler.addListener(new CorridorListener() {
+            @Override
+            public void onCorridorChange() {
+                updateCorridorCanvas();
+            }
+
+            @Override
+            public void onRemovedPedestrians() {
+
+            }
+        });*/
+        server.simulationHandler.addListener(() -> updateCorridorCanvas());
         this.server.start();
         goalRectangleSetup();
 
@@ -44,9 +63,10 @@ public class ServerController {
     }
 
     private void goalRectangleSetup(){
-        Rectangle corridorRectangle = new Rectangle(server.getCorridor().getWidth(),server.getCorridor().getHeight(),Color.WHITE);
-        corridorRectangle.setX(0);
-        corridorRectangle.setX(0);
+        Rectangle corridorRectangle = new Rectangle(server.getCorridor().getWidth(),
+                server.getCorridor().getHeight(),Color.WHEAT);
+        corridorRectangle.setTranslateX(0);
+        corridorRectangle.setTranslateY(0);
         corridorRectangle.setStroke(Color.BLACK);
         corridorRectangle.setStrokeType(StrokeType.CENTERED);
         corridorRectangle.setStrokeWidth(1.0);
@@ -54,23 +74,43 @@ public class ServerController {
 
         Rectangle blueRectangle = new Rectangle(
                 10,server.getCorridor().getHeight(), Color.BLUEVIOLET);
-        blueRectangle.setX(0);
-        blueRectangle.setY(0);
+        blueRectangle.setTranslateX(server.getCorridor().getWidth()-10);
+        blueRectangle.setTranslateY(0);
         canvasPane.getChildren().add(blueRectangle);
 
         Rectangle redRectangle = new Rectangle(
                 10,server.getCorridor().getHeight(),Color.ORANGERED);
-        redRectangle.setX(server.getCorridor().getWidth()-10);
-        redRectangle.setY(0);
+        redRectangle.setTranslateX(0);
+        redRectangle.setTranslateY(0);
         canvasPane.getChildren().add(redRectangle);
     }
 
     private void updateCorridorCanvas(){
         Platform.runLater(() -> {
             circles.clear();
-            System.out.println("Update corridor canvas är igång");
             server.getCorridor().getPedestrianList().forEach(p ->
                     circles.add(p.circle));
+            progressIndicator.setProgress(server.getCorridor().progressReport());
+            progressBar.setProgress(server.getCorridor().progressReport());
+            server.getCorridor().removePedestriansInGoalArea();
         });
+    }
+
+    public void onStartButtonAction(ActionEvent actionEvent) {
+        System.out.println("Start button pressed");
+        if(!server.simulationHandler.isSimulationActive())
+            server.simulationHandler.toggleIsConnectionActive();
+        server.simulationHandler.start();
+    }
+
+    public void onPauseButtonAction(ActionEvent actionEvent) {
+        if(server.simulationHandler.isSimulationActive()){
+            server.simulationHandler.toggleIsConnectionActive();
+        }
+    }
+
+    public void onStopButtonAction(ActionEvent actionEvent) {
+        server.toggleIsServerOn();
+        server.simulationHandler.toggleIsConnectionActive();
     }
 }

@@ -1,7 +1,7 @@
 package klient;
 
 import model.Corridor;
-import server.Pedestrian;
+import model.Pedestrian;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -17,6 +17,8 @@ public class Client {
     private Pedestrian pedestrian;
     private ArrayList<Pedestrian> pedestrianList;
     private Corridor corridor;
+    private int connectionID;
+    private int numberOfActiveConnections;
 
     public Client(){
         try {
@@ -26,12 +28,15 @@ public class Client {
             pedestrianList = new ArrayList<>();
             while(true) {
                 objectInputStream = new ObjectInputStream(socket.getInputStream());
+                connectionID = objectInputStream.readInt();
+                numberOfActiveConnections = objectInputStream.readInt();
+                System.out.println("Connection ID: " + connectionID);
+                System.out.println("Number of active connections: " + numberOfActiveConnections);
                 corridor = (Corridor) objectInputStream.readObject();
 
-                for (Pedestrian p: corridor.getPedestrianList()) {
-                    p.move(corridor);
-                    pedestrianList.add(p);
-                }
+                double startOfClientsMapSegment = (connectionID - 1)*corridor.getWidth()/numberOfActiveConnections;
+                double endOfClientsMapSegment = (connectionID*corridor.getWidth()/numberOfActiveConnections);
+                pedestrianList = corridor.pedestriansMovedWithinSegment(startOfClientsMapSegment, endOfClientsMapSegment);
 
                 objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
                 objectOutputStream.writeObject(pedestrianList);

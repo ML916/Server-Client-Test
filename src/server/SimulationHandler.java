@@ -9,56 +9,70 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class CommunicationHandler extends Thread {
+public class SimulationHandler extends Thread {
 
     private ArrayList<Connection> connections;
     private List<CorridorListener> listeners = new ArrayList<CorridorListener>();
     private ExecutorService threadPool;
     private Corridor corridor;
-    private boolean isConnectionActive = true;
+    private boolean isSimulationActive = true;
 
-    public CommunicationHandler() {
+    public SimulationHandler() {
         connections = new ArrayList<Connection>();
         threadPool = Executors.newCachedThreadPool();
-        //this.start();
     }
 
-    public CommunicationHandler(Corridor corridor){
+    public SimulationHandler(Corridor corridor){
         this();
         this.corridor = corridor;
     }
 
     public void toggleIsConnectionActive(){
-        this.isConnectionActive = !isConnectionActive;
+        this.isSimulationActive = !isSimulationActive;
+    }
+
+    public boolean isSimulationActive() {
+        return isSimulationActive;
     }
 
     @Override
     public void run() {
-        while(isConnectionActive) {
-                try {
-                    synchronized (connections) {
-                        /*List<Future<String>> futures = */
-                        threadPool.invokeAll(connections);
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            fireCorridorChangeEvent();
+        int simulationTimer = 0;
+        while(isSimulationActive && connections.size() > 0) {
             try {
-                this.sleep(1000);
+                synchronized (connections) {
+                    /*List<Future<String>> futures = */
+                    threadPool.invokeAll(connections);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            fireCorridorChangeEvent();
+            if (simulationTimer % 3 == 0)
+                corridor.addNewPedestrian();
+            //corridor.removePedestriansInGoalArea();
+            try {
+                this.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            simulationTimer++;
         }
     }
 
     private void fireCorridorChangeEvent(){
-        synchronized (corridor){
             for (CorridorListener listener: listeners) {
                 listener.onCorridorChange();
             }
-        }
     }
+
+    /*private void firePedestriansRemovedEvent(){
+        synchronized (corridor){
+            for (CorridorListener listener: listeners){
+                listener.onRemovedPedestrians();
+            }
+        }
+    }*/
 
     public void addConnection(Socket socket){
         synchronized (connections) {
@@ -67,10 +81,6 @@ public class CommunicationHandler extends Thread {
               connection = new Connection(socket, corridor);
             }
             connections.add(connection);
-
-            //if (connections.size() > 2 && !this.isAlive())
-            if(!this.isAlive())
-                this.start();
         }
     }
 

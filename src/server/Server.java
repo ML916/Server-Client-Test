@@ -9,7 +9,7 @@ import java.net.Socket;
 public class Server extends Thread {
     private boolean isServerOn = true;
     private ServerSocket serverSocket;
-    public CommunicationHandler communicationHandler;
+    public SimulationHandler simulationHandler;
     private Corridor corridor;
 
     public boolean isServerOn() {
@@ -27,20 +27,14 @@ public class Server extends Thread {
 
     public Server(){
         super();
-        this.corridor = new Corridor(16,300, 200);
+        this.corridor = new Corridor(30,400, 150);
         this.isServerOn = true;
         try {
             serverSocket = new ServerSocket(11111);
-            communicationHandler = new CommunicationHandler(corridor);
+            simulationHandler = new SimulationHandler(corridor);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //this.start();
-    }
-
-    public Server(Corridor corridor){
-        this();
-        this.corridor = corridor;
     }
 
     public void run(){
@@ -49,13 +43,13 @@ public class Server extends Thread {
             try {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("New client has connected to the server");
-                communicationHandler.addConnection(clientSocket);
+                simulationHandler.addConnection(clientSocket);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         System.out.println("Server: run should be closed now");
-        communicationHandler.toggleIsConnectionActive();
+        simulationHandler.toggleIsConnectionActive();
         try {
             serverSocket.close();
         } catch (IOException e) {

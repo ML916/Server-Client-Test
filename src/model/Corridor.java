@@ -1,20 +1,13 @@
 package model;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.shape.Circle;
-import server.Pedestrian;
-
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class Corridor implements Serializable {
     public ArrayList<Pedestrian> pedestrianList;
     private final double width;
     private final double height;
-    private final List<CorridorListener> listeners = new ArrayList<>();
     //public transient ObservableList<Circle> pedestrianList;
 
     public Corridor(int numberOfPedestrians, double width, double height){
@@ -32,6 +25,37 @@ public class Corridor implements Serializable {
         }
     }
 
+    public ArrayList<Pedestrian> pedestriansMovedWithinSegment(double startOfSegment, double endOfSegment){
+        ArrayList<Pedestrian> movedPedestrians = new ArrayList<>();
+        for(Pedestrian p: this.pedestrianList){
+            if((p.getX() >= startOfSegment) && (p.getX() < endOfSegment)) {
+                p.move(this);
+                movedPedestrians.add(p);
+            }
+        }
+        return movedPedestrians;
+    }
+
+    public void addNewPedestrian(){
+        synchronized (this) {
+            Pedestrian pedestrian = new Pedestrian(this);
+            pedestrianList.add(pedestrian);
+        }
+    }
+
+    public boolean removePedestriansInGoalArea(){
+        boolean isRemovingPedestrian = false;
+        synchronized(this) {
+            for (Pedestrian pedestrian : this.pedestrianList) {
+                if (pedestrian.hasReachedGoal()) {
+                    pedestrianList.remove(pedestrian);
+                    isRemovingPedestrian = true;
+                }
+            }
+        }
+        return isRemovingPedestrian;
+    }
+
     public double getWidth(){
         return width;
     }
@@ -42,5 +66,14 @@ public class Corridor implements Serializable {
 
     public ArrayList<Pedestrian> getPedestrianList() {
         return pedestrianList;
+    }
+
+    public double progressReport(){
+        double pedestriansInGoal = 0;
+        for (Pedestrian pedestrian: this.pedestrianList) {
+            if(pedestrian.hasReachedGoal())
+                pedestriansInGoal++;
+        }
+        return (pedestriansInGoal/this.pedestrianList.size());
     }
 }
