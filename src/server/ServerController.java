@@ -14,6 +14,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
+import model.CorridorListener;
+import model.Pedestrian;
 
 public class ServerController {
     public Server server;
@@ -29,23 +31,8 @@ public class ServerController {
 
     private ObservableList<Circle> circles = FXCollections.observableArrayList();
 
-    public void initModel(Server server){
-        this.server = server;
-        /*server.simulationHandler.addListener(new CorridorListener() {
-            @Override
-            public void onCorridorChange() {
-                updateCorridorCanvas();
-            }
-
-            @Override
-            public void onRemovedPedestrians() {
-
-            }
-        });*/
-        server.simulationHandler.addListener(() -> updateCorridorCanvas());
-        this.server.start();
-        goalRectangleSetup();
-
+    public ServerController(){
+        System.out.println("Controller constructor");
         circles.addListener((ListChangeListener<Circle>) c->  {
             while(c.next()) {
                 if(c.wasAdded()) {
@@ -59,6 +46,15 @@ public class ServerController {
                 }
             }
         });
+    }
+
+    public void initModel(Server server){
+        this.server = server;
+        server.simulationHandler.addListener(() -> updateCorridorCanvas());
+        this.server.start();
+        goalRectangleSetup();
+
+
         updateCorridorCanvas();
     }
 
@@ -88,28 +84,56 @@ public class ServerController {
     private void updateCorridorCanvas(){
         Platform.runLater(() -> {
             circles.clear();
-            server.getCorridor().getPedestrianList().forEach(p ->
-                    circles.add(p.circle));
+            synchronized (server.getCorridor()) {
+                server.getCorridor().getPedestrianList().forEach(p ->
+                        circles.add(setupCircle(p)));
+            }
             progressIndicator.setProgress(server.getCorridor().progressReport());
             progressBar.setProgress(server.getCorridor().progressReport());
             server.getCorridor().removePedestriansInGoalArea();
         });
     }
 
+    private Circle setupCircle(Pedestrian pedestrian){
+        if (!pedestrian.hasReachedGoal()) {
+            switch (pedestrian.DIRECTION) {
+                case RIGHT:
+                    return new Circle(pedestrian.getX(), pedestrian.getY(), 2.5, Color.BLUE);
+                case LEFT:
+                    return new Circle(pedestrian.getX(), pedestrian.getY(), 2.5, Color.RED);
+            }
+        }
+        return null;
+    }
+
+    private void removeCircles(){
+        Platform.runLater(() -> {
+            synchronized (server.getCorridor()) {
+                server.getCorridor().removePedestriansInGoalArea();
+            }
+        });
+    }
+
     public void onStartButtonAction(ActionEvent actionEvent) {
-        System.out.println("Start button pressed");
         if(!server.simulationHandler.isSimulationActive())
             server.simulationHandler.toggleIsConnectionActive();
         server.simulationHandler.start();
+        startButton.setDisable(true);
+        pauseButton.setDisable(false);
+        stopButton.setDisable(false);
     }
 
     public void onPauseButtonAction(ActionEvent actionEvent) {
+        startButton.setDisable(false);
         if(server.simulationHandler.isSimulationActive()){
             server.simulationHandler.toggleIsConnectionActive();
         }
     }
 
     public void onStopButtonAction(ActionEvent actionEvent) {
+        startButton.setDisable(true);
+        pauseButton.setDisable(true);
+        stopButton.setDisable(true);
         server.toggleIsServerOn();
         server.simulationHandler.toggleIsConnectionActive();
     }

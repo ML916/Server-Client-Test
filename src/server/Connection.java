@@ -30,7 +30,7 @@ public class Connection implements Callable<String> {
     @Override
     public String call() throws Exception {
         try {
-            if (socket.isConnected()) {
+            if (!socket.isClosed()) {
                 outputStream = new ObjectOutputStream(socket.getOutputStream());
                 outputStream.writeInt(ID);
                 outputStream.writeInt(numberOfConnections);
@@ -42,7 +42,13 @@ public class Connection implements Callable<String> {
 
                 for (Pedestrian pedestrian : pedestrianList) {
                     if (corridor.pedestrianList.contains(pedestrian)) {
-                        corridor.pedestrianList.set(corridor.pedestrianList.indexOf(pedestrian), pedestrian);
+                        if(pedestrian.hasReachedGoal()) {
+                            synchronized (corridor) {
+                                corridor.pedestrianList.remove(pedestrian);
+                            }
+                        }
+                        else
+                            corridor.pedestrianList.set(corridor.pedestrianList.indexOf(pedestrian), pedestrian);
                     }
                 }
 

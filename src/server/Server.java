@@ -27,7 +27,7 @@ public class Server extends Thread {
 
     public Server(){
         super();
-        this.corridor = new Corridor(30,400, 150);
+        this.corridor = new Corridor(200,400, 150);
         this.isServerOn = true;
         try {
             serverSocket = new ServerSocket(11111);

@@ -5,9 +5,12 @@ import model.CorridorListener;
 
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class SimulationHandler extends Thread {
 
@@ -40,19 +43,24 @@ public class SimulationHandler extends Thread {
         int simulationTimer = 0;
         while(isSimulationActive && connections.size() > 0) {
             try {
+                List<Future<String>> futures;
                 synchronized (connections) {
-                    /*List<Future<String>> futures = */
-                    threadPool.invokeAll(connections);
+                    futures = threadPool.invokeAll(connections);
+                }
+                for (Future<String> future: futures) {
+                    System.out.println(future.get());
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
             fireCorridorChangeEvent();
-            if (simulationTimer % 3 == 0)
+
+            if (simulationTimer % 5 == 0)
                 corridor.addNewPedestrian();
-            //corridor.removePedestriansInGoalArea();
             try {
-                this.sleep(500);
+                this.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -67,11 +75,9 @@ public class SimulationHandler extends Thread {
     }
 
     /*private void firePedestriansRemovedEvent(){
-        synchronized (corridor){
             for (CorridorListener listener: listeners){
                 listener.onRemovedPedestrians();
             }
-        }
     }*/
 
     public void addConnection(Socket socket){
