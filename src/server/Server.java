@@ -5,12 +5,15 @@ import model.Corridor;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Server extends Thread {
     private boolean isServerOn = true;
     private ServerSocket serverSocket;
     public SimulationHandler simulationHandler;
     private Corridor corridor;
+    private List<ServerListener> serverListeners = new ArrayList<ServerListener>();
 
     public boolean isServerOn() {
         return isServerOn;
@@ -38,6 +41,7 @@ public class Server extends Thread {
     }
 
     public void run(){
+        fireServerIsAliveEvent();
         while(isServerOn){
             System.out.println("Waiting for connection");
             try {
@@ -49,11 +53,29 @@ public class Server extends Thread {
             }
         }
         System.out.println("Server: run should be closed now");
-        simulationHandler.toggleIsConnectionActive();
+        if(simulationHandler.isSimulationActive())
+            simulationHandler.toggleIsSimulationActive();
         try {
             serverSocket.close();
+            fireServerDisconnectedEvent();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void addServerListener(ServerListener serverListener){
+        serverListeners.add(serverListener);
+    }
+
+    private void fireServerIsAliveEvent() {
+        for (ServerListener listener: serverListeners) {
+            listener.onServerIsAlive();
+        }
+    }
+
+    private void fireServerDisconnectedEvent() {
+        for (ServerListener listener: serverListeners) {
+            listener.onServerDisconnected();
         }
     }
 

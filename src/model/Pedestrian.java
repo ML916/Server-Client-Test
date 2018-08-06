@@ -210,10 +210,10 @@ public class Pedestrian implements Serializable {
 
     private void forcesFromWalls(double distanceToUpperWall, double distanceToLowerWall){
         if(distanceToUpperWall < 10){
-            forceY += distanceToUpperWall/2 + 0.5;
+            forceY += distanceToUpperWall/4 + 0.5;
         }
         else if (distanceToLowerWall < 10){
-            forceY -= distanceToLowerWall/2 + 0.5;
+            forceY -= distanceToLowerWall/4 + 0.5;
         }
         if(distanceToUpperWall < distanceToLowerWall){
             if((this.y + forceY) < this.perception.UPPER_WALL){

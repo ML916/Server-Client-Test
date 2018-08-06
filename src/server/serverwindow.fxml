@@ -31,8 +31,8 @@
       <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
             <Button fx:id="startButton" layoutX="74.0" layoutY="23.0" mnemonicParsing="false" onAction="#onStartButtonAction" prefHeight="25.0" prefWidth="53.0" text="Start" />
-            <Button fx:id="pauseButton" layoutX="74.0" layoutY="122.0" mnemonicParsing="false" onAction="#onPauseButtonAction" prefHeight="25.0" prefWidth="56.0" text="Pause" />
-            <Button fx:id="stopButton" layoutX="74.0" layoutY="72.0" mnemonicParsing="false" onAction="#onStopButtonAction" prefHeight="25.0" prefWidth="56.0" text="Stop" />
+            <Button fx:id="pauseButton" disable="true" layoutX="74.0" layoutY="122.0" mnemonicParsing="false" onAction="#onPauseButtonAction" prefHeight="25.0" prefWidth="56.0" text="Pause" />
+            <Button fx:id="stopButton" disable="true" layoutX="74.0" layoutY="72.0" mnemonicParsing="false" onAction="#onStopButtonAction" prefHeight="25.0" prefWidth="56.0" text="Stop" />
          </children>
       </Pane>
    </right>
