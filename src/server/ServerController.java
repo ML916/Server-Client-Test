@@ -64,13 +64,14 @@ public class ServerController {
                 Platform.runLater(() ->
                         AlertBox.display("Server disconnected",
                                 "The server has been disconnected and will no longer accept new connections"));
+
             }
         });
         server.simulationHandler.addCorridorListener(() -> updateCorridorCanvas());
         server.simulationHandler.addSimulationHandlerListener(new SimulationHandlerListener() {
             @Override
             public void onConnectionDropped() {
-                Platform.runLater(() ->
+                /*Platform.runLater(() ->
                         AlertBox.display("Connection dropped", "Connection with a client has been dropped.\n" +
                         "Simulation will now shift to the remaining clients"));
                 startButton.setDisable(false);
@@ -78,7 +79,7 @@ public class ServerController {
                 stopButton.setDisable(true);
                 if(server.simulationHandler.isSimulationActive()){
                     server.simulationHandler.toggleIsSimulationActive();
-                }
+                }*/
             }
 
             @Override
@@ -120,12 +121,12 @@ public class ServerController {
         Platform.runLater(() -> {
             circles.clear();
             synchronized (server.getCorridor()) {
-                server.getCorridor().getPedestrianList().forEach(p ->
+                server.getCorridor().pedestrianList().forEach(p ->
                         circles.add(setupCircle(p)));
             }
             progressIndicator.setProgress(server.getCorridor().progressReport());
             progressBar.setProgress(server.getCorridor().progressReport());
-            server.getCorridor().removePedestriansInGoalArea();
+            //server.getCorridor().removePedestriansInGoalArea();
         });
     }
 
@@ -141,35 +142,27 @@ public class ServerController {
         return null;
     }
 
-    private void removeCircles(){
-        Platform.runLater(() -> {
-            synchronized (server.getCorridor()) {
-                server.getCorridor().removePedestriansInGoalArea();
-            }
-        });
-    }
-
     public void onStartButtonAction(ActionEvent actionEvent) {
-        server.simulationHandler.toggleIsSimulationActive();
-        if(!server.simulationHandler.isAlive())
+        server.simulationHandler.setIsSimulationActive(true);
+        if(!server.simulationHandler.isAlive()){
             server.simulationHandler.start();
+        }
         startButton.setDisable(true);
         pauseButton.setDisable(false);
         stopButton.setDisable(false);
+        System.out.println("Pressed start.");
     }
 
     public void onPauseButtonAction(ActionEvent actionEvent) {
         startButton.setDisable(false);
-        if(server.simulationHandler.isSimulationActive()){
-            server.simulationHandler.toggleIsSimulationActive();
-        }
+        server.simulationHandler.setIsSimulationActive(false);
     }
 
     public void onStopButtonAction(ActionEvent actionEvent) {
         startButton.setDisable(true);
         pauseButton.setDisable(true);
         stopButton.setDisable(true);
-        server.toggleIsServerOn();
-        server.simulationHandler.toggleIsSimulationActive();
+        server.setIsServerOn(false);
+        server.simulationHandler.setIsSimulationActive(false);
     }
 }

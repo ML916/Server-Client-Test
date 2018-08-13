@@ -5,22 +5,25 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Corridor implements Serializable {
-    public ArrayList<Pedestrian> pedestrianList;
-    private final double width;
-    private final double height;
-    //public transient ObservableList<Circle> pedestrianList;
+    private ArrayList<Pedestrian> pedestrianList;
+    private final double WIDTH;
+    private final double HEIGHT;
 
     public Corridor(int numberOfPedestrians, double width, double height){
-        this.width = width;
-        this.height = height;
+        this.WIDTH = width;
+        this.HEIGHT = height;
         this.pedestrianList = new ArrayList<>();
         initPedestrianList(numberOfPedestrians);
+    }
+
+    public ArrayList<Pedestrian> pedestrianList(){
+        return this.pedestrianList;
     }
 
     private void initPedestrianList(int numberOfPedestrians){
         Random random = new Random();
         for (int i = 0; i < numberOfPedestrians; i++){
-            Pedestrian pedestrian = new Pedestrian(random.nextInt((int) width),random.nextInt((int) height));
+            Pedestrian pedestrian = new Pedestrian(random.nextInt((int) WIDTH),random.nextInt((int) HEIGHT));
             pedestrianList.add(pedestrian);
         }
     }
@@ -36,6 +39,17 @@ public class Corridor implements Serializable {
         return movedPedestrians;
     }
 
+    public void editPedestrianInCorridor(Pedestrian pedestrian) {
+        if (this.pedestrianList.contains(pedestrian)) {
+            if (pedestrian.hasReachedGoal()) {
+                synchronized (this) {
+                    this.pedestrianList.remove(pedestrian);
+                }
+            } else
+                this.pedestrianList.set(this.pedestrianList.indexOf(pedestrian), pedestrian);
+        }
+    }
+
     public void addNewPedestrian(){
         synchronized (this) {
             Pedestrian pedestrian = new Pedestrian(this);
@@ -43,29 +57,12 @@ public class Corridor implements Serializable {
         }
     }
 
-    public boolean removePedestriansInGoalArea(){
-        boolean isRemovingPedestrian = false;
-        synchronized(this) {
-            for (Pedestrian pedestrian : this.pedestrianList) {
-                if (pedestrian.hasReachedGoal()) {
-                    pedestrianList.remove(pedestrian);
-                    isRemovingPedestrian = true;
-                }
-            }
-        }
-        return isRemovingPedestrian;
-    }
-
     public double getWidth(){
-        return width;
+        return WIDTH;
     }
 
     public double getHeight(){
-        return height;
-    }
-
-    public ArrayList<Pedestrian> getPedestrianList() {
-        return pedestrianList;
+        return HEIGHT;
     }
 
     public double progressReport(){

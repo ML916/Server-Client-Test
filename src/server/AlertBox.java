@@ -10,7 +10,7 @@ public class AlertBox {
         Stage window = new Stage();
 
         //Block events to other windows
-        window.initModality(Modality.APPLICATION_MODAL);
+        window.initModality(Modality.WINDOW_MODAL);
         window.setTitle(title);
         window.setMinWidth(250);
 

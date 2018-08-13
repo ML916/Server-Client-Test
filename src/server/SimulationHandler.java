@@ -31,12 +31,8 @@ public class SimulationHandler extends Thread {
         this.corridor = corridor;
     }
 
-    public void toggleIsSimulationActive(){
-        if(isSimulationActive)
-            isSimulationActive = false;
-        else
-            isSimulationActive = true;
-        System.out.println("Toggled");
+    public void setIsSimulationActive(boolean isActive){
+        isSimulationActive = isActive;
     }
 
     public boolean isSimulationActive() {
@@ -96,7 +92,7 @@ public class SimulationHandler extends Thread {
     public void addConnection(Socket socket){
         synchronized (connections) {
             synchronized (corridor){
-                new Connection(socket, corridor);
+                new Connection(socket);
             }
         }
         fireConnectionAcceptedEvent();
@@ -115,15 +111,11 @@ public class SimulationHandler extends Thread {
         private Socket socket;
         private ObjectOutputStream outputStream;
         private ObjectInputStream inputStream;
-        private Corridor corridor;
-        public final int ID;
 
-        public Connection(Socket socket, Corridor corridor){
+        public Connection(Socket socket){
             this.socket = socket;
-            this.corridor = corridor;
             this.pedestrianList = new ArrayList<>();
             connections.add(this);
-            ID = connections.size();
         }
 
         @Override
@@ -131,7 +123,7 @@ public class SimulationHandler extends Thread {
             try {
                 if (!socket.isClosed()) {
                     outputStream = new ObjectOutputStream(socket.getOutputStream());
-                    outputStream.writeInt(ID);
+                    outputStream.writeInt(connections.indexOf(this) + 1);
                     outputStream.writeInt(connections.size());
                     synchronized (corridor) {
                         outputStream.writeObject(corridor);
@@ -140,15 +132,7 @@ public class SimulationHandler extends Thread {
                     pedestrianList = (ArrayList<Pedestrian>) inputStream.readObject();
 
                     for (Pedestrian pedestrian : pedestrianList) {
-                        if (corridor.pedestrianList.contains(pedestrian)) {
-                            if(pedestrian.hasReachedGoal()) {
-                                synchronized (corridor) {
-                                    corridor.pedestrianList.remove(pedestrian);
-                                }
-                            }
-                            else
-                                corridor.pedestrianList.set(corridor.pedestrianList.indexOf(pedestrian), pedestrian);
-                        }
+                        corridor.editPedestrianInCorridor(pedestrian);
                     }
 
                     pedestrianList.clear();

@@ -19,9 +19,8 @@ public class Server extends Thread {
         return isServerOn;
     }
 
-    public void toggleIsServerOn(){
-        this.isServerOn = !isServerOn;
-        System.out.println("toggle is server on: " + isServerOn);
+    public void setIsServerOn(boolean serverOn) {
+        isServerOn = serverOn;
     }
 
     public Corridor getCorridor() {
@@ -54,7 +53,7 @@ public class Server extends Thread {
         }
         System.out.println("Server: run should be closed now");
         if(simulationHandler.isSimulationActive())
-            simulationHandler.toggleIsSimulationActive();
+            simulationHandler.setIsSimulationActive(false);
         try {
             serverSocket.close();
             fireServerDisconnectedEvent();
