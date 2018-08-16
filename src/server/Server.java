@@ -1,6 +1,7 @@
 package server;
 
 import model.Corridor;
+import server.SimulationHandler.SimulationStatus;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -8,12 +9,15 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import static server.SimulationHandler.SimulationStatus.*;
+
 public class Server extends Thread {
-    private boolean isServerOn = true;
+    private boolean isServerOn;
     private ServerSocket serverSocket;
-    public SimulationHandler simulationHandler;
     private Corridor corridor;
     private List<ServerListener> serverListeners = new ArrayList<ServerListener>();
+    public SimulationHandler simulationHandler;
+
 
     public boolean isServerOn() {
         return isServerOn;
@@ -44,16 +48,17 @@ public class Server extends Thread {
         while(isServerOn){
             System.out.println("Waiting for connection");
             try {
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("New client has connected to the server");
-                simulationHandler.addConnection(clientSocket);
+                Socket clientSocket;
+                if(simulationHandler.getSimulationStatus() != OFF) {
+                    clientSocket = serverSocket.accept();
+                    simulationHandler.addConnection(clientSocket);
+                    System.out.println("A new client has connected to the server");
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         System.out.println("Server: run should be closed now");
-        if(simulationHandler.isSimulationActive())
-            simulationHandler.setIsSimulationActive(false);
         try {
             serverSocket.close();
             fireServerDisconnectedEvent();
@@ -78,7 +83,4 @@ public class Server extends Thread {
         }
     }
 
-    public static void main(String[] args){
-        new Server();
-    }
 }

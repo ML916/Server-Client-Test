@@ -1,6 +1,6 @@
 package server;
 
-public interface SimulationHandlerListener {
+public interface ConnectionListener {
     void onConnectionDropped();
     void onConnectionAccepted();
 }

@@ -10,23 +10,27 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class Client {
+/**
+ * Runs the necessary calculations for simulation within a certain segment of the corridor
+ * @see Corridor
+ */
+public class SimulationClient {
     private Socket socket;
     private ObjectInputStream objectInputStream;
     private ObjectOutputStream objectOutputStream;
-    private Pedestrian pedestrian;
     private ArrayList<Pedestrian> pedestrianList;
     private Corridor corridor;
     private int connectionID;
     private int numberOfActiveConnections;
 
-    public Client(){
+    public SimulationClient(){
         try {
             InetAddress address = InetAddress.getByName("localhost");
             socket = new Socket(address, 11111);
             System.out.println("Connection with server established");
             pedestrianList = new ArrayList<>();
-            while(true) {
+            while(!socket.isClosed()) {
+                System.out.println("Start of loop");
                 objectInputStream = new ObjectInputStream(socket.getInputStream());
                 connectionID = objectInputStream.readInt();
                 numberOfActiveConnections = objectInputStream.readInt();
@@ -41,6 +45,7 @@ public class Client {
                 objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
                 objectOutputStream.writeObject(pedestrianList);
                 pedestrianList.clear();
+                System.out.println("End of loop");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -58,6 +63,6 @@ public class Client {
     }
 
     public static void main(String[] args){
-        new Client();
+        new SimulationClient();
     }
 }

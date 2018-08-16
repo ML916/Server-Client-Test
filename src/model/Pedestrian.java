@@ -2,22 +2,25 @@ package model;
 
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
-
+/**
+ * Represents a pedestrian.
+ * The pedestrians behaviour is defined by the functions within this class.
+ */
 public class Pedestrian implements Serializable {
     private double x;
     private double y;
-    private double forceX;
-    private double forceY;
+    private double forcesOnXAxis;
+    private double forcesOnYAxis;
     private final double defaultMovementX;
     private final double defaultMovementY;
     private boolean hasReachedGoal;
     private transient Perception perception;
+    private static int numberOfPedestrians = 0;
     public final int ID;
     public final Direction DIRECTION;
-    public static int numberOfPedestrians = 0;
+
 
     public Pedestrian(){
         this.ID = Pedestrian.numberOfPedestrians;
@@ -81,8 +84,8 @@ public class Pedestrian implements Serializable {
         if (!hasReachedGoal) {
             this.perception = new Perception(corridor);
             calculateSocialForce();
-            this.x += defaultMovementX + forceX;
-            this.y += defaultMovementY + forceY;
+            this.x += defaultMovementX + forcesOnXAxis;
+            this.y += defaultMovementY + forcesOnYAxis;
             hasReachedGoal = goalCheck(corridor);
         }
     }
@@ -105,17 +108,13 @@ public class Pedestrian implements Serializable {
     }
 
     private void calculateSocialForce() {
-        forceX = 0;
-        forceY = 0;
-
+        forcesOnXAxis = 0;
+        forcesOnYAxis = 0;
         for(Pedestrian otherPedestrian : perception.pedestrians){
             forceFromOtherPedestrian(otherPedestrian);
         }
-
         double distanceToUpperWall = Math.abs(perception.UPPER_WALL - this.y);
-        System.out.println("Distance to upper wall: " + distanceToUpperWall);
         double distanceToLowerWall = Math.abs(perception.LOWER_WALL - this.y);
-        System.out.println("Distance to lower wall: " + distanceToLowerWall);
         forcesFromWalls(distanceToUpperWall,distanceToLowerWall);
     }
 
@@ -123,31 +122,30 @@ public class Pedestrian implements Serializable {
         if (!this.equals(otherPedestrian)) {
             double distanceX = Math.abs(otherPedestrian.getX() - this.x);
             double distanceY = Math.abs(otherPedestrian.getY() - this.y);
-
+            final double forceOnXFromOppositeDirection = 2;
+            final double forceOnXFromSameDirection = 1.1;
             switch (this.DIRECTION){
                 case RIGHT:
                     if(this.x < otherPedestrian.getX()){
                         switch (otherPedestrian.DIRECTION){
-                            //Figurer till höger om this som går åt höger
                             case RIGHT:
                                 if(distanceX < 10 && distanceY < 10){
                                     if(this.y <= otherPedestrian.getY())
-                                        forceY -= distanceY/2;
+                                        forcesOnYAxis -= distanceY/2;
                                     else if(this.y >= otherPedestrian.getY())
-                                        forceY += distanceY/2;
+                                        forcesOnYAxis += distanceY/2;
                                     if(otherPedestrian.getX() > this.x)
-                                        forceX -= 0.5;
+                                        forcesOnXAxis -= forceOnXFromSameDirection;
                                 }
                                 break;
-                            //figurer till höger som går åt vänster
                             case LEFT:
                                 if(distanceX < 10 && distanceY < 10){
                                     if(this.y <= otherPedestrian.getY())
-                                        forceY -= distanceY/2;
+                                        forcesOnYAxis -= distanceY/2;
                                     else if(this.y >= otherPedestrian.getY())
-                                        forceY += distanceY/2;
+                                        forcesOnYAxis += distanceY/2;
                                     if(otherPedestrian.getX() > this.x)
-                                        forceX -= 2;
+                                        forcesOnXAxis -= forceOnXFromOppositeDirection;
                                 }
                                 break;
                         }
@@ -156,26 +154,24 @@ public class Pedestrian implements Serializable {
                 case LEFT:
                     if(this.x > otherPedestrian.getX()){
                         switch (otherPedestrian.DIRECTION){
-                            //figurer till vänster som går åt höger
                             case RIGHT:
                                 if(distanceX < 10 && distanceY < 10){
                                     if(this.y <= otherPedestrian.getY())
-                                        forceY -= distanceY/2;
+                                        forcesOnYAxis -= distanceY/2;
                                     else if(this.y >= otherPedestrian.getY())
-                                        forceY += distanceY/2;
+                                        forcesOnYAxis += distanceY/2;
                                     if(otherPedestrian.getX() < this.x)
-                                        forceX += 2;
+                                        forcesOnXAxis += forceOnXFromOppositeDirection;
                                 }
                                 break;
-                            //figurer till vänter som går åt vänster
                             case LEFT:
                                 if(distanceX < 10 && distanceY < 10) {
                                     if (this.y <= otherPedestrian.getY())
-                                        forceY -= distanceY/2;
+                                        forcesOnYAxis -= distanceY/2;
                                     else if (this.y >= otherPedestrian.getY())
-                                        forceY += distanceY/2;
+                                        forcesOnYAxis += distanceY/2;
                                     if(otherPedestrian.getX() < this.x)
-                                        forceX += 0.5;
+                                        forcesOnXAxis += forceOnXFromSameDirection;
                                 }
                                 break;
                         }
@@ -187,19 +183,19 @@ public class Pedestrian implements Serializable {
 
     private void forcesFromWalls(double distanceToUpperWall, double distanceToLowerWall){
         if(distanceToUpperWall < 10){
-            forceY += distanceToUpperWall/4 + 0.5;
+            forcesOnYAxis += distanceToUpperWall/4 + 0.5;
         }
         else if (distanceToLowerWall < 10){
-            forceY -= distanceToLowerWall/4 + 0.5;
+            forcesOnYAxis -= distanceToLowerWall/4 + 0.5;
         }
         if(distanceToUpperWall < distanceToLowerWall){
-            if((this.y + forceY) < this.perception.UPPER_WALL){
-                forceY = -(distanceToUpperWall) + 1;
+            if((this.y + forcesOnYAxis) < this.perception.UPPER_WALL){
+                forcesOnYAxis = -(distanceToUpperWall) + 1;
             }
         }
         else if(distanceToUpperWall > distanceToLowerWall){
-            if ((this.y + forceY) > this.perception.LOWER_WALL){
-                forceY = (distanceToLowerWall) - 1;
+            if ((this.y + forcesOnYAxis) > this.perception.LOWER_WALL){
+                forcesOnYAxis = (distanceToLowerWall) - 1;
             }
         }
     }
@@ -216,11 +212,14 @@ public class Pedestrian implements Serializable {
         return hasReachedGoal;
     }
 
-    public class Perception {
-        public final double perceptionRadius = 20;
-        public ArrayList<Pedestrian> pedestrians;
-        public final double UPPER_WALL;
-        public final double LOWER_WALL;
+    /**
+     * Perception is a container class, holding objects which are within reach of effecting a pedestrian.
+     */
+    private class Perception {
+        private final double perceptionRadius = 20;
+        private ArrayList<Pedestrian> pedestrians;
+        private final double UPPER_WALL;
+        private final double LOWER_WALL;
 
         public Perception(Corridor corridor){
             pedestrians = new ArrayList<Pedestrian>();
@@ -229,12 +228,24 @@ public class Pedestrian implements Serializable {
             initPerception(corridor);
         }
 
-        public void initPerception(Corridor corridor){
+        private void initPerception(Corridor corridor){
             for (Pedestrian p:corridor.pedestrianList()) {
                 if(Math.sqrt(Math.pow(x - p.getX(),2)+Math.pow(y - p.getY(),2)) <= perceptionRadius){
                     pedestrians.add(p);
                 }
             }
+        }
+    }
+
+    public enum Direction {
+        LEFT, RIGHT;
+
+        private static final List<Direction> VALUES = Collections.unmodifiableList(Arrays.asList(Direction.values()));
+        private static final int SIZE = VALUES.size();
+        private static final Random RANDOM = new Random();
+
+        public static Direction randomDirection(){
+            return VALUES.get(RANDOM.nextInt(SIZE));
         }
     }
 }

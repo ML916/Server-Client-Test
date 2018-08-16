@@ -13,26 +13,12 @@
    <center>
       <Pane fx:id="canvasPane" prefHeight="299.0" prefWidth="544.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER" />
    </center>
-   <top>
-      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-         <children>
-            <VBox prefHeight="200.0" prefWidth="100.0">
-               <children>
-                  <Label text="Simulation progress:" />
-                  <ProgressIndicator fx:id="progressIndicator" prefHeight="81.0" prefWidth="143.0" progress="0.0" />
-               </children>
-            </VBox>
-            <Label text="Label" />
-            <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" />
-         </children>
-      </HBox>
-   </top>
    <right>
-      <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="startButton" layoutX="74.0" layoutY="23.0" mnemonicParsing="false" onAction="#onStartButtonAction" prefHeight="25.0" prefWidth="53.0" text="Start" />
-            <Button fx:id="pauseButton" disable="true" layoutX="74.0" layoutY="122.0" mnemonicParsing="false" onAction="#onPauseButtonAction" prefHeight="25.0" prefWidth="56.0" text="Pause" />
-            <Button fx:id="stopButton" disable="true" layoutX="74.0" layoutY="72.0" mnemonicParsing="false" onAction="#onStopButtonAction" prefHeight="25.0" prefWidth="56.0" text="Stop" />
+            <Button fx:id="startButton" disable="true" layoutX="14.0" layoutY="22.0" mnemonicParsing="false" onAction="#onStartButtonAction" prefHeight="25.0" prefWidth="53.0" text="Start" />
+            <Button fx:id="pauseButton" disable="true" layoutX="72.0" layoutY="22.0" mnemonicParsing="false" onAction="#onPauseButtonAction" prefHeight="25.0" prefWidth="56.0" text="Pause" />
+            <Button fx:id="stopButton" disable="true" layoutX="137.0" layoutY="22.0" mnemonicParsing="false" onAction="#onStopButtonAction" prefHeight="25.0" prefWidth="56.0" text="Stop" />
          </children>
       </Pane>
    </right>

@@ -4,6 +4,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
+
+/**
+ * Represents a Corridor, with all of its' properties such as the size and any people within it.
+
+ */
 public class Corridor implements Serializable {
     private ArrayList<Pedestrian> pedestrianList;
     private final double WIDTH;

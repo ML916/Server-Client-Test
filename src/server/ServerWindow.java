@@ -6,6 +6,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import server.SimulationHandler.SimulationStatus;
+
+import static javafx.application.Platform.*;
+import static server.SimulationHandler.SimulationStatus.*;
 
 public class ServerWindow extends Application {
 
@@ -18,8 +22,14 @@ public class ServerWindow extends Application {
         Server server = new Server();
         controller.initModel(server);
 
+        primaryStage.setOnCloseRequest(e -> {
+            server.simulationHandler.setSimulationStatus(OFF);
+            server.setIsServerOn(false);
+            Platform.exit();
+        });
+
         primaryStage.setTitle("Server Window");
-        primaryStage.setScene(new Scene(root, server.getCorridor().getWidth(),server.getCorridor().getHeight()));
+        primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
 
