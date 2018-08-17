@@ -1,4 +1,4 @@
-package model;
+package listener_interfaces;
 
 /**
  * A listener interface for function related to

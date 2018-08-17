@@ -1,7 +1,8 @@
 package server;
 
+import listener_interfaces.ServerListener;
 import model.Corridor;
-import server.SimulationHandler.SimulationStatus;
+import model.SimulationHandler;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -9,7 +10,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import static server.SimulationHandler.SimulationStatus.*;
+import static model.SimulationHandler.SimulationStatus.*;
 
 public class Server extends Thread {
     private boolean isServerOn;
@@ -18,6 +19,10 @@ public class Server extends Thread {
     private List<ServerListener> serverListeners = new ArrayList<ServerListener>();
     public SimulationHandler simulationHandler;
 
+
+    public ServerSocket getServerSocket() {
+        return serverSocket;
+    }
 
     public boolean isServerOn() {
         return isServerOn;
@@ -33,7 +38,18 @@ public class Server extends Thread {
 
     public Server(){
         super();
-        this.corridor = new Corridor(200,400, 150);
+        this.corridor = new Corridor(240,400, 180);
+        this.isServerOn = true;
+        try {
+            serverSocket = new ServerSocket(11111);
+            simulationHandler = new SimulationHandler(corridor);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Server(Corridor corridor){
+        this.corridor = corridor;
         this.isServerOn = true;
         try {
             serverSocket = new ServerSocket(11111);

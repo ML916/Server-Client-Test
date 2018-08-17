@@ -1,9 +1,8 @@
-package server;
+package model;
 
-import klient.SimulationClient;
-import model.Corridor;
-import model.SimulationListener;
-import model.Pedestrian;
+import simulation_client.SimulationClient;
+import listener_interfaces.SimulationListener;
+import listener_interfaces.ConnectionListener;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,9 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-import static server.SimulationHandler.SimulationStatus.ACTIVE;
-import static server.SimulationHandler.SimulationStatus.OFF;
-import static server.SimulationHandler.SimulationStatus.PAUSED;
+import static model.SimulationHandler.SimulationStatus.ACTIVE;
+import static model.SimulationHandler.SimulationStatus.OFF;
+import static model.SimulationHandler.SimulationStatus.PAUSED;
 
 /**
  * Maintains the necessary communications with clients to run a simulation

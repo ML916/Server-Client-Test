@@ -1,4 +1,4 @@
-package server;
+package listener_interfaces;
 
 public interface ConnectionListener {
     void onConnectionDropped();

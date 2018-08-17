@@ -1,4 +1,4 @@
-package server;
+package view;
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.layout.*;
@@ -13,8 +13,9 @@ public class AlertBox {
             window.initModality(Modality.APPLICATION_MODAL);
         else
             window.initModality(Modality.WINDOW_MODAL);
+
         window.setTitle(title);
-        window.setMinWidth(250);
+        window.setMinWidth(300);
 
         Label label = new Label();
         label.setText(message);

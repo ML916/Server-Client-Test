@@ -1,4 +1,4 @@
-package klient;
+package simulation_client;
 
 import model.Corridor;
 import model.Pedestrian;
