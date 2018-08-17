@@ -1,4 +1,4 @@
-package server;
+package controller;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -6,8 +6,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -15,13 +13,19 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 import javafx.stage.Stage;
+import listener_interfaces.ConnectionListener;
+import listener_interfaces.ServerListener;
+import model.Corridor;
 import model.Pedestrian;
-import server.SimulationHandler.SimulationStatus;
+import model.SimulationHandler;
+import server.Server;
+import view.AlertBox;
 
-import static server.SimulationHandler.SimulationStatus.*;
+import static model.SimulationHandler.SimulationStatus.*;
 
 public class ServerController {
     public Server server;
+    public Corridor corridor;
     public BorderPane mainBorderPane;
     public Pane canvasPane;
 
@@ -32,8 +36,6 @@ public class ServerController {
     private ObservableList<Circle> circles = FXCollections.observableArrayList();
 
     public ServerController(){
-        System.out.println("Controller constructor");
-
         circles.addListener((ListChangeListener<Circle>) c->  {
             while(c.next()) {
                 if(c.wasAdded()) {
@@ -51,6 +53,7 @@ public class ServerController {
 
     public void initModel(Server server){
         this.server = server;
+        this.corridor = server.getCorridor();
         this.server.start();
         server.addServerListener(new ServerListener() {
             @Override
@@ -65,7 +68,6 @@ public class ServerController {
                 Platform.runLater(() ->
                         AlertBox.display("Server disconnected",
                                 "The server has been disconnected and will no longer accept new connections", true));
-
             }
         });
         server.simulationHandler.addSimulationListener(() -> updateCorridorCanvas());
@@ -124,11 +126,9 @@ public class ServerController {
         Platform.runLater(() -> {
             circles.clear();
             synchronized (server.getCorridor()) {
-                server.getCorridor().pedestrianList().forEach(p ->
+                corridor.pedestrianList().forEach(p ->
                         circles.add(setupCircle(p)));
             }
-            //progressIndicator.setProgress(server.getCorridor().progressReport());
-            //progressBar.setProgress(server.getCorridor().progressReport());
         });
     }
 
@@ -136,6 +136,7 @@ public class ServerController {
         if (server.simulationHandler.getNumberOfConnections() >= server.simulationHandler.REQUIRED_NUMBER_OF_CONNECTIONS
                 && server.simulationHandler.getSimulationStatus() == PAUSED){
             startButton.setDisable(false);
+            pauseButton.setDisable(true);
         }
         else {
             startButton.setDisable(true);
@@ -176,7 +177,8 @@ public class ServerController {
         server.setIsServerOn(false);
         server.simulationHandler.setSimulationStatus(OFF);
         Stage stage = (Stage) stopButton.getScene().getWindow();
-        if(AlertBox.display("Stop button pressed", "The simulation has been terminated", true))
+        if(AlertBox.display("Stop button pressed", "The simulation has been terminated", true)) {
             stage.close();
+        }
     }
 }
