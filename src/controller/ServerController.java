@@ -5,7 +5,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.print.PageLayout;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -15,6 +18,7 @@ import javafx.scene.shape.StrokeType;
 import javafx.stage.Stage;
 import listener_interfaces.ConnectionListener;
 import listener_interfaces.ServerListener;
+import listener_interfaces.SimulationListener;
 import model.Corridor;
 import model.Pedestrian;
 import model.SimulationHandler;
@@ -24,16 +28,19 @@ import view.AlertBox;
 import static model.SimulationHandler.SimulationStatus.*;
 
 public class ServerController {
-    public Server server;
-    public Corridor corridor;
+    private Server server;
+    private Corridor corridor;
     public BorderPane mainBorderPane;
     public Pane canvasPane;
 
     public Button startButton;
     public Button pauseButton;
     public Button stopButton;
+    public ListView messageListView;
+    public Label simulationStatusLabel;
 
     private ObservableList<Circle> circles = FXCollections.observableArrayList();
+    private ObservableList<String> messages = FXCollections.observableArrayList("Welcome to the pedestrian simulation program.");
 
     public ServerController(){
         circles.addListener((ListChangeListener<Circle>) c->  {
@@ -44,30 +51,23 @@ public class ServerController {
                 if(c.wasRemoved()) {
                     canvasPane.getChildren().removeAll(c.getRemoved());
                 }
-                if(c.wasUpdated()){
-
-                }
             }
         });
     }
 
     public void initModel(Server server){
+        messageListView.setItems(messages);
         this.server = server;
-        this.corridor = server.getCorridor();
-        this.server.start();
+        this.corridor = server.simulationHandler.corridor;
         server.addServerListener(new ServerListener() {
             @Override
             public void onServerIsAlive() {
-                Platform.runLater(() ->
-                        AlertBox.display("Server is active",
-                                "The server is now active and accepting connections from clients", true));
+                Platform.runLater(() -> messages.add(0, "The server is now active and accepting connections from clients"));
             }
 
             @Override
             public void onServerDisconnected() {
-                Platform.runLater(() ->
-                        AlertBox.display("Server disconnected",
-                                "The server has been disconnected and will no longer accept new connections", true));
+                Platform.runLater(() -> messages.add(0, "The server has been disconnected."));
             }
         });
         server.simulationHandler.addSimulationListener(() -> updateCorridorCanvas());
@@ -75,33 +75,41 @@ public class ServerController {
             @Override
             public void onConnectionDropped() {
                 setStartButtonStatus();
+                System.out.println("Connection dropped");
                 if(server.simulationHandler.getNumberOfConnections() >= server.simulationHandler.REQUIRED_NUMBER_OF_CONNECTIONS) {
                     Platform.runLater(() ->
-                            AlertBox.display("Connection dropped", "Connection with a client has been dropped.\n" +
-                                    "Simulation will now shift to the remaining clients.", false));
+                            messages.add(0,"Connection with a client has been dropped. Simulation will now shift to the remaining clients."));
                 }
                 else{
-                    Platform.runLater(() ->
-                            AlertBox.display("Simulation interrupted", "Connection with a client has been dropped.\n" +
-                                    "The simulation will be paused, you may resume it when enough clients have reconnected", true));
+                    Platform.runLater(() -> {
+                        messages.add(0, "The simulation has been paused, you may resume it when enough clients have reconnected");
+                        simulationStatusLabel.setText("Simulation status: Paused \n" + "Not enough clients connected.");
+                        simulationStatusLabel.setTextFill(Color.RED);
+                    });
                 }
-
             }
 
             @Override
             public void onConnectionAccepted() {
                 setStartButtonStatus();
-                Platform.runLater(()-> AlertBox.display("New client connected",
-                        "A new client has connected to the server.\n", false));
+                Platform.runLater(()-> {
+                    messages.add(0,"A new client has connected to the server.");
+                    if(server.simulationHandler.getSimulationStatus() == PAUSED
+                            && server.simulationHandler.getNumberOfConnections() >= server.simulationHandler.REQUIRED_NUMBER_OF_CONNECTIONS){
+                        simulationStatusLabel.setText("Simulation status: Paused");
+                        simulationStatusLabel.setTextFill(Color.ORANGE);
+                    }
+                });
             }
         });
+        this.server.start();
         goalRectangleSetup();
         updateCorridorCanvas();
     }
 
     private void goalRectangleSetup(){
-        Rectangle corridorRectangle = new Rectangle(server.getCorridor().getWidth(),
-                server.getCorridor().getHeight(),Color.WHEAT);
+        Rectangle corridorRectangle = new Rectangle(corridor.getWidth(),
+                corridor.getHeight(),Color.WHEAT);
         corridorRectangle.setTranslateX(0);
         corridorRectangle.setTranslateY(0);
         corridorRectangle.setStroke(Color.BLACK);
@@ -110,13 +118,13 @@ public class ServerController {
         canvasPane.getChildren().add(corridorRectangle);
 
         Rectangle blueRectangle = new Rectangle(
-                10,server.getCorridor().getHeight(), Color.BLUEVIOLET);
-        blueRectangle.setTranslateX(server.getCorridor().getWidth()-10);
+                10,corridor.getHeight(), Color.BLUEVIOLET);
+        blueRectangle.setTranslateX(corridor.getWidth()-10);
         blueRectangle.setTranslateY(0);
         canvasPane.getChildren().add(blueRectangle);
 
         Rectangle redRectangle = new Rectangle(
-                10,server.getCorridor().getHeight(),Color.ORANGERED);
+                10,corridor.getHeight(),Color.ORANGERED);
         redRectangle.setTranslateX(0);
         redRectangle.setTranslateY(0);
         canvasPane.getChildren().add(redRectangle);
@@ -125,7 +133,8 @@ public class ServerController {
     private void updateCorridorCanvas(){
         Platform.runLater(() -> {
             circles.clear();
-            synchronized (server.getCorridor()) {
+            System.out.println("Updated corridor canvas.");
+            synchronized (corridor) {
                 corridor.pedestrianList().forEach(p ->
                         circles.add(setupCircle(p)));
             }
@@ -134,7 +143,7 @@ public class ServerController {
 
     private void setStartButtonStatus(){
         if (server.simulationHandler.getNumberOfConnections() >= server.simulationHandler.REQUIRED_NUMBER_OF_CONNECTIONS
-                && server.simulationHandler.getSimulationStatus() == PAUSED){
+                && server.simulationHandler.getSimulationStatus() != ACTIVE){
             startButton.setDisable(false);
             pauseButton.setDisable(true);
         }
@@ -156,6 +165,13 @@ public class ServerController {
     }
 
     public void onStartButtonAction(ActionEvent actionEvent) {
+        if(server.simulationHandler.getSimulationStatus() == OFF) {
+            server.simulationHandler.resetSimulation();
+            messages.add(0,"Simulation has been restarted.");
+        }
+        else {
+            messages.add(0, "Simulation has been started.");
+        }
         server.simulationHandler.setSimulationStatus(ACTIVE);
         if(!server.simulationHandler.isAlive()){
             server.simulationHandler.start();
@@ -163,22 +179,28 @@ public class ServerController {
         startButton.setDisable(true);
         pauseButton.setDisable(false);
         stopButton.setDisable(false);
+        simulationStatusLabel.setText("Simulation status: Active");
+        simulationStatusLabel.setTextFill(Color.GREEN);
     }
 
     public void onPauseButtonAction(ActionEvent actionEvent) {
         server.simulationHandler.setSimulationStatus(PAUSED);
         setStartButtonStatus();
+        simulationStatusLabel.setText("Simulation status: Paused");
+        simulationStatusLabel.setTextFill(Color.ORANGE);
+        messages.add(0, "Simulation has been paused.");
     }
 
     public void onStopButtonAction(ActionEvent actionEvent) {
-        startButton.setDisable(true);
         pauseButton.setDisable(true);
         stopButton.setDisable(true);
-        server.setIsServerOn(false);
         server.simulationHandler.setSimulationStatus(OFF);
-        Stage stage = (Stage) stopButton.getScene().getWindow();
-        if(AlertBox.display("Stop button pressed", "The simulation has been terminated", true)) {
-            stage.close();
-        }
+        setStartButtonStatus();
+        messages.add(0, "The simulation has been terminated.");
+        simulationStatusLabel.setText("Simulation status: Stopped");
+        simulationStatusLabel.setTextFill(Color.RED);
+        AlertBox.display("Stop button pressed", "The simulation has been terminated. \n"
+                + "You may start a new simulation.", true);
+
     }
 }

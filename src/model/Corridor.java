@@ -13,21 +13,24 @@ public class Corridor implements Serializable {
     private ArrayList<Pedestrian> pedestrianList;
     private final double WIDTH;
     private final double HEIGHT;
+    private final int INITIAL_NUMBER_OF_PEDESTRIANS;
 
     public Corridor(int numberOfPedestrians, double width, double height){
         this.WIDTH = width;
         this.HEIGHT = height;
         this.pedestrianList = new ArrayList<>();
-        initPedestrianList(numberOfPedestrians);
+        INITIAL_NUMBER_OF_PEDESTRIANS = numberOfPedestrians;
+        initPedestrianList();
     }
 
     public ArrayList<Pedestrian> pedestrianList(){
         return this.pedestrianList;
     }
 
-    private void initPedestrianList(int numberOfPedestrians){
+    public void initPedestrianList(){
         Random random = new Random();
-        for (int i = 0; i < numberOfPedestrians; i++){
+        pedestrianList.clear();
+        for (int i = 0; i < INITIAL_NUMBER_OF_PEDESTRIANS; i++){
             Pedestrian pedestrian = new Pedestrian(random.nextInt((int) WIDTH),random.nextInt((int) HEIGHT));
             pedestrianList.add(pedestrian);
         }
@@ -39,6 +42,7 @@ public class Corridor implements Serializable {
             if((p.getX() >= startOfSegment) && (p.getX() < endOfSegment)) {
                 p.move(this);
                 movedPedestrians.add(p);
+                //System.out.println("Pedestrian " + p.ID + "was moved");
             }
         }
         return movedPedestrians;
@@ -50,8 +54,10 @@ public class Corridor implements Serializable {
                 synchronized (this) {
                     this.pedestrianList.remove(pedestrian);
                 }
-            } else
+            } else {
                 this.pedestrianList.set(this.pedestrianList.indexOf(pedestrian), pedestrian);
+                //System.out.println("Pedestrian " + pedestrian.ID + " was moved");
+            }
         }
     }
 
@@ -68,14 +74,5 @@ public class Corridor implements Serializable {
 
     public double getHeight(){
         return HEIGHT;
-    }
-
-    public double progressReport(){
-        double pedestriansInGoal = 0;
-        for (Pedestrian pedestrian: this.pedestrianList) {
-            if(pedestrian.hasReachedGoal())
-                pedestriansInGoal++;
-        }
-        return (pedestriansInGoal/this.pedestrianList.size());
     }
 }

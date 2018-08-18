@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import model.Corridor;
+import model.SimulationHandler;
 import server.Server;
 import controller.ServerController;
 
@@ -22,8 +23,9 @@ public class ServerWindow extends Application {
         Parent root = fxmlLoader.load();
 
         ServerController controller = fxmlLoader.getController();
-        Corridor corridor = new Corridor(240,400, 180);
-        Server server = new Server(corridor);
+        SimulationHandler simulationHandler = new SimulationHandler(
+                new Corridor(240,400, 180));
+        Server server = new Server(simulationHandler);
         controller.initModel(server);
 
         primaryStage.setOnCloseRequest(e -> {
@@ -34,6 +36,7 @@ public class ServerWindow extends Application {
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
+            server.interrupt();
             Platform.exit();
         });
 

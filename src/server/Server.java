@@ -7,6 +7,7 @@ import model.SimulationHandler;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,6 @@ import static model.SimulationHandler.SimulationStatus.*;
 public class Server extends Thread {
     private boolean isServerOn;
     private ServerSocket serverSocket;
-    private Corridor corridor;
     private List<ServerListener> serverListeners = new ArrayList<ServerListener>();
     public SimulationHandler simulationHandler;
 
@@ -32,55 +32,58 @@ public class Server extends Thread {
         isServerOn = serverOn;
     }
 
-    public Corridor getCorridor() {
-        return corridor;
+    public void setSimulationHandler(SimulationHandler simulationHandler) {
+        this.simulationHandler = simulationHandler;
     }
 
     public Server(){
         super();
-        this.corridor = new Corridor(240,400, 180);
         this.isServerOn = true;
         try {
             serverSocket = new ServerSocket(11111);
-            simulationHandler = new SimulationHandler(corridor);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public Server(Corridor corridor){
+    public Server(SimulationHandler simulationHandler){
+        this();
+        this.simulationHandler = simulationHandler;
+    }
+    /*public Server(Corridor corridor){
+        super();
         this.corridor = corridor;
         this.isServerOn = true;
         try {
             serverSocket = new ServerSocket(11111);
+            serverSocket.setSoTimeout(1000);
             simulationHandler = new SimulationHandler(corridor);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public void run(){
         fireServerIsAliveEvent();
         while(isServerOn){
-            System.out.println("Waiting for connection");
+            //System.out.println("Waiting for new connections");
             try {
                 Socket clientSocket;
-                if(simulationHandler.getSimulationStatus() != OFF) {
-                    clientSocket = serverSocket.accept();
-                    simulationHandler.addConnection(clientSocket);
-                    System.out.println("A new client has connected to the server");
-                }
+                clientSocket = serverSocket.accept();
+                simulationHandler.addConnection(clientSocket);
+                System.out.println("A new client has connected to the server");
             } catch (IOException e) {
-                e.printStackTrace();
+
             }
         }
-        System.out.println("Server: run should be closed now");
         try {
+            System.out.println("Closing server socket");
             serverSocket.close();
-            fireServerDisconnectedEvent();
+            //fireServerDisconnectedEvent();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("Server has been shutdown.");
     }
 
     public void addServerListener(ServerListener serverListener){
