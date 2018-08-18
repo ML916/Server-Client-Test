@@ -43,9 +43,8 @@ public class SimulationHandler extends Thread {
         this.corridor = corridor;
     }
 
-    public void resetSimulation(){
-        simulationTimer = 0;
-        corridor.initPedestrianList();
+    public Corridor getCorridor() {
+        return corridor;
     }
 
     public int getNumberOfConnections(){
@@ -91,6 +90,11 @@ public class SimulationHandler extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            try {
+                this.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -113,6 +117,11 @@ public class SimulationHandler extends Thread {
         for (ConnectionListener listener: connectionListeners){
             listener.onConnectionAccepted();
         }
+    }
+
+    public void resetSimulation(){
+        simulationTimer = 0;
+        corridor.initPedestrianList();
     }
 
     public void addConnection(Socket socket) {

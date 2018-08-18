@@ -58,7 +58,7 @@ public class ServerController {
     public void initModel(Server server){
         messageListView.setItems(messages);
         this.server = server;
-        this.corridor = server.simulationHandler.corridor;
+        this.corridor = server.simulationHandler.getCorridor();
         server.addServerListener(new ServerListener() {
             @Override
             public void onServerIsAlive() {
