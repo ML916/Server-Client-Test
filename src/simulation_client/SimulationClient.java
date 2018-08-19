@@ -1,8 +1,10 @@
 package simulation_client;
 
+import dataPacket.DataPacket;
 import model.Corridor;
 import model.Pedestrian;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -34,12 +36,15 @@ public class SimulationClient {
                 objectInputStream = new ObjectInputStream(socket.getInputStream());
                 //boolean isSimulationActive = objectInputStream.readBoolean();
                 //if(isSimulationActive) {
-                    connectionID = objectInputStream.readInt();
-                    numberOfActiveConnections = objectInputStream.readInt();
+                    //connectionID = objectInputStream.readInt();
+                    //numberOfActiveConnections = objectInputStream.readInt();
                     System.out.println("Connection ID: " + connectionID);
                     System.out.println("Number of active connections: " + numberOfActiveConnections);
-                    corridor = (Corridor) objectInputStream.readObject();
-
+                    //corridor = (Corridor) objectInputStream.readObject();
+                DataPacket dataPacket = (DataPacket) objectInputStream.readObject();
+                corridor = dataPacket.corridor;
+                connectionID = dataPacket.connectionNumber;
+                numberOfActiveConnections = dataPacket.numberOfActiveConnections;
                     double startOfClientsMapSegment = (connectionID - 1) * corridor.getWidth() / numberOfActiveConnections;
                     double endOfClientsMapSegment = (connectionID * corridor.getWidth() / numberOfActiveConnections);
                     pedestrianList = corridor.pedestriansMovedWithinSegment(startOfClientsMapSegment, endOfClientsMapSegment);

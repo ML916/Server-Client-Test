@@ -1,5 +1,6 @@
 package model;
 
+import dataPacket.DataPacket;
 import simulation_client.SimulationClient;
 import listener_interfaces.SimulationListener;
 import listener_interfaces.ConnectionListener;
@@ -156,10 +157,13 @@ public class SimulationHandler extends Thread {
                 if (!socket.isClosed()) {
                         System.out.println("Call started");
                         outputStream = new ObjectOutputStream(socket.getOutputStream());
-                        outputStream.writeInt(connections.indexOf(this) + 1);
-                        outputStream.writeInt(connections.size());
+                        //outputStream.writeInt(connections.indexOf(this) + 1);
+                        //outputStream.writeInt(connections.size());
                         synchronized (corridor) {
-                            outputStream.writeObject(corridor);
+                            //outputStream.writeObject(corridor);
+                            DataPacket dataPacket = new DataPacket(corridor,connections.indexOf(this) + 1
+                                    ,connections.size(), false);
+                            outputStream.writeObject(dataPacket);
                         }
                         inputStream = new ObjectInputStream(socket.getInputStream());
                         pedestrianList = (ArrayList<Pedestrian>) inputStream.readObject();
