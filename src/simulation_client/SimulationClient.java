@@ -21,7 +21,7 @@ public class SimulationClient {
     private ObjectInputStream objectInputStream;
     private ObjectOutputStream objectOutputStream;
 
-    public SimulationClient(){
+    private SimulationClient(){
         try {
             InetAddress address = InetAddress.getByName("localhost");
             socket = new Socket(address, 11111);

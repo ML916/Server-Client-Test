@@ -78,11 +78,11 @@ public class ServerController {
                 System.out.println("Connection dropped");
                 if(server.simulationHandler.getNumberOfConnections() >= server.simulationHandler.REQUIRED_NUMBER_OF_CONNECTIONS) {
                     Platform.runLater(() ->
-                            messages.add(0,"Connection with a client has been dropped. Simulation will now shift to the remaining clients."));
+                            messages.add(0,"Connection with a client has been dropped.\n Simulation will now shift to the remaining clients."));
                 }
                 else{
                     Platform.runLater(() -> {
-                        messages.add(0, "The simulation has been paused, you may resume it when enough clients have reconnected");
+                        messages.add(0, "The simulation has been paused,\n you may resume it when enough clients have reconnected");
                         simulationStatusLabel.setText("Simulation status: Paused \n" + "Not enough clients connected.");
                         simulationStatusLabel.setTextFill(Color.RED);
                     });
@@ -196,7 +196,7 @@ public class ServerController {
         stopButton.setDisable(true);
         server.simulationHandler.setSimulationStatus(OFF);
         setStartButtonStatus();
-        messages.add(0, "The simulation has been terminated.");
+        messages.add(0, "The simulation has been terminated. \n" + "You may start a new simulation.");
         simulationStatusLabel.setText("Simulation status: Stopped");
         simulationStatusLabel.setTextFill(Color.RED);
         AlertBox.display("Stop button pressed", "The simulation has been terminated. \n"

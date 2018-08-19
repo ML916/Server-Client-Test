@@ -32,10 +32,6 @@ public class Server extends Thread {
         isServerOn = serverOn;
     }
 
-    public void setSimulationHandler(SimulationHandler simulationHandler) {
-        this.simulationHandler = simulationHandler;
-    }
-
     public Server(){
         super();
         this.isServerOn = true;
@@ -50,23 +46,11 @@ public class Server extends Thread {
         this();
         this.simulationHandler = simulationHandler;
     }
-    /*public Server(Corridor corridor){
-        super();
-        this.corridor = corridor;
-        this.isServerOn = true;
-        try {
-            serverSocket = new ServerSocket(11111);
-            serverSocket.setSoTimeout(1000);
-            simulationHandler = new SimulationHandler(corridor);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
 
     public void run(){
         fireServerIsAliveEvent();
         while(isServerOn){
-            //System.out.println("Waiting for new connections");
+            System.out.println("Waiting for new connections");
             try {
                 Socket clientSocket;
                 clientSocket = serverSocket.accept();
