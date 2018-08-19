@@ -184,11 +184,12 @@ public class SimulationHandler extends Thread {
         }
 
         private void terminateConnection() throws IOException {
+            connections.remove(this);
+            fireConnectionDroppedEvent();
             outputStream.close();
             inputStream.close();
             socket.close();
-            connections.remove(this);
-            fireConnectionDroppedEvent();
+
         }
     }
 
