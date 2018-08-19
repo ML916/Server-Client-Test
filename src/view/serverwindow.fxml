@@ -20,7 +20,7 @@
             <Button fx:id="pauseButton" disable="true" layoutX="72.0" layoutY="22.0" mnemonicParsing="false" onAction="#onPauseButtonAction" prefHeight="25.0" prefWidth="56.0" text="Pause" />
             <Button fx:id="stopButton" disable="true" layoutX="137.0" layoutY="22.0" mnemonicParsing="false" onAction="#onStopButtonAction" prefHeight="25.0" prefWidth="56.0" text="Stop" />
             <ListView fx:id="messageListView" layoutY="100.0" prefHeight="269.0" prefWidth="284.0" />
-            <Label fx:id="simulationStatusLabel" layoutX="14.0" layoutY="64.0" text="Label" />
+            <Label fx:id="simulationStatusLabel" layoutX="14.0" layoutY="64.0" text="Welcome to the pedestrian simulation." />
          </children>
       </Pane>
    </right>

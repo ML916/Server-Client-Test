@@ -37,6 +37,7 @@ public class Server extends Thread {
         this.isServerOn = true;
         try {
             serverSocket = new ServerSocket(11111);
+            serverSocket.setSoTimeout(1000);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -5,7 +5,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.print.PageLayout;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -15,15 +14,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
-import javafx.stage.Stage;
 import listener_interfaces.ConnectionListener;
 import listener_interfaces.ServerListener;
-import listener_interfaces.SimulationListener;
 import model.Corridor;
 import model.Pedestrian;
-import model.SimulationHandler;
 import server.Server;
-import view.AlertBox;
 
 import static model.SimulationHandler.SimulationStatus.*;
 
@@ -199,8 +194,6 @@ public class ServerController {
         messages.add(0, "The simulation has been terminated. \n" + "You may start a new simulation.");
         simulationStatusLabel.setText("Simulation status: Stopped");
         simulationStatusLabel.setTextFill(Color.RED);
-        AlertBox.display("Stop button pressed", "The simulation has been terminated. \n"
-                + "You may start a new simulation.", true);
 
     }
 }

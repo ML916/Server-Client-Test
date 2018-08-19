@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * Runs the necessary calculations for simulation within a certain segment of the corridor
  * @see Corridor
  */
-public class SimulationClient {
+public class SimulationClient extends Thread {
     private Socket socket;
     private ObjectInputStream objectInputStream;
     private ObjectOutputStream objectOutputStream;
@@ -31,35 +31,34 @@ public class SimulationClient {
             socket = new Socket(address, 11111);
             System.out.println("Connection with server established");
             pedestrianList = new ArrayList<>();
-            while(!socket.isClosed()) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void run() {
+        try{
+            while(!socket.isClosed()){
                 System.out.println("Start of loop");
                 objectInputStream = new ObjectInputStream(socket.getInputStream());
-                //boolean isSimulationActive = objectInputStream.readBoolean();
-                //if(isSimulationActive) {
-                    //connectionID = objectInputStream.readInt();
-                    //numberOfActiveConnections = objectInputStream.readInt();
-                    System.out.println("Connection ID: " + connectionID);
-                    System.out.println("Number of active connections: " + numberOfActiveConnections);
-                    //corridor = (Corridor) objectInputStream.readObject();
                 DataPacket dataPacket = (DataPacket) objectInputStream.readObject();
                 corridor = dataPacket.corridor;
                 connectionID = dataPacket.connectionNumber;
                 numberOfActiveConnections = dataPacket.numberOfActiveConnections;
-                    double startOfClientsMapSegment = (connectionID - 1) * corridor.getWidth() / numberOfActiveConnections;
-                    double endOfClientsMapSegment = (connectionID * corridor.getWidth() / numberOfActiveConnections);
-                    pedestrianList = corridor.pedestriansMovedWithinSegment(startOfClientsMapSegment, endOfClientsMapSegment);
-
-                    objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-                    objectOutputStream.writeObject(pedestrianList);
-                    pedestrianList.clear();
-                //}
+                double startOfClientsMapSegment = (connectionID - 1) * corridor.getWidth() / numberOfActiveConnections;
+                double endOfClientsMapSegment = (connectionID * corridor.getWidth() / numberOfActiveConnections);
+                pedestrianList = corridor.pedestriansMovedWithinSegment(startOfClientsMapSegment, endOfClientsMapSegment);
+                objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+                objectOutputStream.writeObject(pedestrianList);
+                pedestrianList.clear();
                 System.out.println("End of loop");
             }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-        } finally {
+        }finally {
             try {
                 socket.close();
                 objectInputStream.close();
@@ -71,6 +70,6 @@ public class SimulationClient {
     }
 
     public static void main(String[] args){
-        new SimulationClient();
+        new SimulationClient().start();
     }
 }
