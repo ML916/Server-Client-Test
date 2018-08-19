@@ -1,6 +1,5 @@
 package model;
 
-import dataPacket.DataPacket;
 import simulation_client.SimulationClient;
 import listener_interfaces.SimulationListener;
 import listener_interfaces.ConnectionListener;
@@ -26,7 +25,7 @@ public class SimulationHandler extends Thread {
     private List<SimulationListener> simulationListeners = new ArrayList<SimulationListener>();
     private List<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
     private ExecutorService threadPool;
-    public Corridor corridor;
+    private Corridor corridor;
     private SimulationStatus simulationStatus = PAUSED;
     private int simulationTimer;
     public final int REQUIRED_NUMBER_OF_CONNECTIONS;
@@ -90,30 +89,22 @@ public class SimulationHandler extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            try {
-                this.sleep(200);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 
     private void fireSimulationRoundCompletedEvent(){
-            System.out.println("Simulation round completed event!");
             for (SimulationListener listener: simulationListeners) {
                 listener.onSimulationRoundComplete();
             }
     }
 
     private void fireConnectionDroppedEvent(){
-        System.out.println("Connection dropped event");
         for (ConnectionListener listener: connectionListeners){
             listener.onConnectionDropped();
         }
     }
 
     private void fireConnectionAcceptedEvent(){
-        System.out.println("Connection accepted event");
         for (ConnectionListener listener: connectionListeners){
             listener.onConnectionAccepted();
         }
@@ -155,12 +146,6 @@ public class SimulationHandler extends Thread {
 
         public Connection(Socket socket){
             this.socket = socket;
-            try {
-                this.outputStream = new ObjectOutputStream(socket.getOutputStream());
-                this.inputStream = new ObjectInputStream(socket.getInputStream());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             this.pedestrianList = new ArrayList<>();
             connections.add(this);
         }
@@ -169,28 +154,24 @@ public class SimulationHandler extends Thread {
         public Boolean call() throws Exception {
             try {
                 if (!socket.isClosed()) {
-                    //System.out.println("Call started");
+                        System.out.println("Call started");
+                        outputStream = new ObjectOutputStream(socket.getOutputStream());
+                        outputStream.writeInt(connections.indexOf(this) + 1);
+                        outputStream.writeInt(connections.size());
+                        synchronized (corridor) {
+                            outputStream.writeObject(corridor);
+                        }
+                        inputStream = new ObjectInputStream(socket.getInputStream());
+                        pedestrianList = (ArrayList<Pedestrian>) inputStream.readObject();
 
-                    DataPacket dataPacket = new DataPacket(corridor,connections.indexOf(this) + 1,
-                            connections.size(), false);
-                    outputStream.writeObject(dataPacket);
-                    /*synchronized (corridor) {
-                        outputStream.writeObject(corridor);
-                    }*/
-                    pedestrianList = (ArrayList<Pedestrian>) inputStream.readObject();
+                        for (Pedestrian pedestrian : pedestrianList) {
+                            corridor.editPedestrianInCorridor(pedestrian);
+                        }
 
-                    //System.out.println("Index of connection: " + (connections.indexOf(this) + 1));
-                    //System.out.println("Pedestrian list size: "+ pedestrianList.size());
-                    for (Pedestrian pedestrian : pedestrianList) {
-                        corridor.editPedestrianInCorridor(pedestrian);
-                    }
+                        pedestrianList.clear();
+                        System.out.println("Call completed");
 
-                    pedestrianList.clear();
-                    //System.out.println("Call completed");
                     return true;
-                }
-                else{
-                    terminateConnection();
                 }
             } catch (IOException e) {
                 terminateConnection();
@@ -203,14 +184,11 @@ public class SimulationHandler extends Thread {
         }
 
         private void terminateConnection() throws IOException {
-            synchronized (connections) {
-                connections.remove(this);
-            }
             outputStream.close();
             inputStream.close();
             socket.close();
+            connections.remove(this);
             fireConnectionDroppedEvent();
-            System.out.println("Connection terminated");
         }
     }
 

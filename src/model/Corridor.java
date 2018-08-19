@@ -19,7 +19,7 @@ public class Corridor implements Serializable {
         this.WIDTH = width;
         this.HEIGHT = height;
         this.pedestrianList = new ArrayList<>();
-        INITIAL_NUMBER_OF_PEDESTRIANS = numberOfPedestrians;
+        this.INITIAL_NUMBER_OF_PEDESTRIANS = numberOfPedestrians;
         initPedestrianList();
     }
 
@@ -42,7 +42,6 @@ public class Corridor implements Serializable {
             if((p.getX() >= startOfSegment) && (p.getX() < endOfSegment)) {
                 p.move(this);
                 movedPedestrians.add(p);
-                //System.out.println("Pedestrian " + p.ID + "was moved");
             }
         }
         return movedPedestrians;
@@ -54,10 +53,8 @@ public class Corridor implements Serializable {
                 synchronized (this) {
                     this.pedestrianList.remove(pedestrian);
                 }
-            } else {
+            } else
                 this.pedestrianList.set(this.pedestrianList.indexOf(pedestrian), pedestrian);
-                //System.out.println("Pedestrian " + pedestrian.ID + " was moved");
-            }
         }
     }
 
