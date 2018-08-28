@@ -6,6 +6,11 @@ import model.Pedestrian;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * A container class holding a Corridor object and integers representing the index of the sending connection object and size of the list connections within SimulationHandler
+ * @see Corridor
+ * @see model.SimulationHandler
+ */
 public class DataPacket implements Serializable {
     public Corridor corridor;
     public int connectionNumber;

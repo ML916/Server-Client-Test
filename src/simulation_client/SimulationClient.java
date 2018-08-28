@@ -25,6 +25,9 @@ public class SimulationClient extends Thread {
     private int connectionID;
     private int numberOfActiveConnections;
 
+    /**
+     * Creates a SimulationClient object and connects it to a socket using the InetAddress of the server
+     */
     private SimulationClient(){
         try {
             InetAddress address = InetAddress.getByName("localhost");
@@ -36,6 +39,9 @@ public class SimulationClient extends Thread {
         }
     }
 
+    /**
+     * Receives a DataPacket from the server containing a corridor object and info needed to determine which segment of the corridor it should work with. The pedestrians within the segment are modified and then sent back to the server in a list.
+     */
     @Override
     public void run() {
         try{

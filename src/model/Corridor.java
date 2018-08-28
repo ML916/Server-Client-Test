@@ -6,8 +6,7 @@ import java.util.Random;
 
 
 /**
- * Represents a Corridor, with all of its' properties such as the size and any people within it.
-
+ * Represents a Corridor, with all of its properties such as the size and any pedestrians within it.
  */
 public class Corridor implements Serializable {
     private ArrayList<Pedestrian> pedestrianList;
@@ -15,6 +14,12 @@ public class Corridor implements Serializable {
     private final double HEIGHT;
     private final int INITIAL_NUMBER_OF_PEDESTRIANS;
 
+    /**
+     * Creates a Corridor object.
+     * @param numberOfPedestrians The starting number of pedestrians within the corridor
+     * @param width The corridors width
+     * @param height The corridors height
+     */
     public Corridor(int numberOfPedestrians, double width, double height){
         this.WIDTH = width;
         this.HEIGHT = height;
@@ -23,10 +28,13 @@ public class Corridor implements Serializable {
         initPedestrianList();
     }
 
-    public ArrayList<Pedestrian> pedestrianList(){
+    public ArrayList<Pedestrian> getPedestrianList(){
         return this.pedestrianList;
     }
 
+    /**
+     * Initiates the pedestrianList
+     */
     public void initPedestrianList(){
         Random random = new Random();
         pedestrianList.clear();
@@ -36,6 +44,13 @@ public class Corridor implements Serializable {
         }
     }
 
+    /**
+     * A function for moving pedestrians within a certain segment of the corridor.
+     * @see Pedestrian
+     * @param startOfSegment Represents the start of the corridor segment handled by this method
+     * @param endOfSegment Represents the end of the corridor segment handled by this method
+     * @return Returns a list of the pedestrians moved within the corridor segment.
+     */
     public ArrayList<Pedestrian> pedestriansMovedWithinSegment(double startOfSegment, double endOfSegment){
         ArrayList<Pedestrian> movedPedestrians = new ArrayList<>();
         for(Pedestrian p: this.pedestrianList){
@@ -47,6 +62,11 @@ public class Corridor implements Serializable {
         return movedPedestrians;
     }
 
+    /**
+     * Replaces a pedestrian object within the corridor if, if one exists with the same ID.
+     * @see Pedestrian
+     * @param pedestrian The pedestrian object to find and replace within the corridor
+     */
     public void editPedestrianInCorridor(Pedestrian pedestrian) {
         if (this.pedestrianList.contains(pedestrian)) {
             if (pedestrian.hasReachedGoal()) {
@@ -58,6 +78,10 @@ public class Corridor implements Serializable {
         }
     }
 
+    /**
+     * Adds a new pedestrian in the corridor on a random side of the corridor
+     * @see Pedestrian
+     */
     public void addNewPedestrian(){
         synchronized (this) {
             Pedestrian pedestrian = new Pedestrian(this);

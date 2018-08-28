@@ -143,12 +143,24 @@ public class SimulationHandler extends Thread {
         private ObjectOutputStream outputStream;
         private ObjectInputStream inputStream;
 
+        /**
+         * Creates a connection object with its assigned socket
+         * @param socket The socket this connection will communicate with
+         */
         public Connection(Socket socket){
             this.socket = socket;
             this.pedestrianList = new ArrayList<>();
             connections.add(this);
         }
 
+        /**
+         * Communicates with a SimulationClient. Sends out a DataPacket containing the current Corridor object, index of this connection object within SimulationHandler.connections and size of the connections list.
+         * A list of Pedestrian objects is then received from the SimulationClient containing the pedestrians it has modified. They are inserted into the pedestrianList of the corridor using the editPedestrianInCorridor method
+         * @see Corridor
+         * @see SimulationClient
+         * @return
+         * @throws Exception
+         */
         @Override
         public Boolean call() throws Exception {
             try {
@@ -180,6 +192,10 @@ public class SimulationHandler extends Thread {
             return false;
         }
 
+        /**
+         * The Connection objection is removed from the connections list and socket, outputStream and inputStream are closed if connection with the SimulationClient has been lost.
+         * @throws IOException
+         */
         private void terminateConnection() throws IOException {
             connections.remove(this);
             fireConnectionDroppedEvent();
@@ -190,6 +206,9 @@ public class SimulationHandler extends Thread {
         }
     }
 
+    /**
+     * The SimulationStatus enum represents whether the simulation is active, paused or turned off
+     */
     public enum SimulationStatus {
         ACTIVE, PAUSED, OFF
     }

@@ -13,6 +13,9 @@ import java.util.List;
 
 import static model.SimulationHandler.SimulationStatus.*;
 
+/**
+ * Server is a thread that listens for connections from clients.
+ */
 public class Server extends Thread {
     private boolean isServerOn;
     private ServerSocket serverSocket;
@@ -24,7 +27,7 @@ public class Server extends Thread {
         return serverSocket;
     }
 
-    public boolean isServerOn() {
+    public boolean getIsServerOn() {
         return isServerOn;
     }
 
@@ -43,11 +46,21 @@ public class Server extends Thread {
         }
     }
 
+    /**
+     * Creates a Server object and assigns its simulationHandler
+     * @param simulationHandler A SimulationHandler object to be assigned to the Server
+     * @see SimulationHandler
+     */
     public Server(SimulationHandler simulationHandler){
         this();
         this.simulationHandler = simulationHandler;
     }
 
+    /**
+     * This function listens to new connections on the serverSocket and adds a Connection object to the simulationHandler
+     * @see SimulationHandler
+     * @see model.SimulationHandler.Connection
+     */
     public void run(){
         fireServerIsAliveEvent();
         while(isServerOn){
@@ -64,7 +77,6 @@ public class Server extends Thread {
         try {
             System.out.println("Closing server socket");
             serverSocket.close();
-            //fireServerDisconnectedEvent();
         } catch (IOException e) {
             e.printStackTrace();
         }

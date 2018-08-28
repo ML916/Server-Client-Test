@@ -22,6 +22,9 @@ import server.Server;
 
 import static model.SimulationHandler.SimulationStatus.*;
 
+/**
+ * Controller that interacts between the Server, SimulationHandler, serverwindow.fxml and ServerWindow classes.
+ */
 public class ServerController {
     private Server server;
     private Corridor corridor;
@@ -50,6 +53,10 @@ public class ServerController {
         });
     }
 
+    /**
+     * Initiates the graphical interface as well as adding listeners to the simulationHandler and server objects
+     * @param server The server object the controller works with
+     */
     public void initModel(Server server){
         messageListView.setItems(messages);
         this.server = server;
@@ -102,6 +109,9 @@ public class ServerController {
         updateCorridorCanvas();
     }
 
+    /**
+     * Sets up the visual representation of the corridor on the GUI
+     */
     private void goalRectangleSetup(){
         Rectangle corridorRectangle = new Rectangle(corridor.getWidth(),
                 corridor.getHeight(),Color.WHEAT);
@@ -125,17 +135,27 @@ public class ServerController {
         canvasPane.getChildren().add(redRectangle);
     }
 
+    /**
+     * Updates the GUI with current positions of all Pedestrian objects within the corridor
+     * @see Pedestrian
+     * @see Corridor
+     */
     private void updateCorridorCanvas(){
         Platform.runLater(() -> {
             circles.clear();
             System.out.println("Updated corridor canvas.");
             synchronized (corridor) {
-                corridor.pedestrianList().forEach(p ->
+                corridor.getPedestrianList().forEach(p ->
                         circles.add(setupCircle(p)));
             }
         });
     }
 
+    /**
+     * Sets start button status according to how many clients are connected to the server as well as simulation status
+     * @see model.SimulationHandler
+     * @see model.SimulationHandler.SimulationStatus
+     */
     private void setStartButtonStatus(){
         if (server.simulationHandler.getNumberOfConnections() >= server.simulationHandler.REQUIRED_NUMBER_OF_CONNECTIONS
                 && server.simulationHandler.getSimulationStatus() != ACTIVE){
@@ -147,6 +167,11 @@ public class ServerController {
         }
     }
 
+    /**
+     * Sets up a circle representing a Pedestrian object
+     * @param pedestrian The pedestrian object to receive a visual representation
+     * @return A circle representing the pedestrian parameter
+     */
     private Circle setupCircle(Pedestrian pedestrian){
         if (!pedestrian.hasReachedGoal()) {
             switch (pedestrian.DIRECTION) {
@@ -159,6 +184,10 @@ public class ServerController {
         return null;
     }
 
+    /**
+     * Function called when start button is pressed. Starts the simulation if was paused, resets and starts the simulation if it was turned off.
+     * @param actionEvent
+     */
     public void onStartButtonAction(ActionEvent actionEvent) {
         if(server.simulationHandler.getSimulationStatus() == OFF) {
             server.simulationHandler.resetSimulation();
@@ -178,6 +207,10 @@ public class ServerController {
         simulationStatusLabel.setTextFill(Color.GREEN);
     }
 
+    /**
+     * Called when the pause button is pressed. Pauses the simulation
+     * @param actionEvent
+     */
     public void onPauseButtonAction(ActionEvent actionEvent) {
         server.simulationHandler.setSimulationStatus(PAUSED);
         setStartButtonStatus();
@@ -186,6 +219,10 @@ public class ServerController {
         messages.add(0, "Simulation has been paused.");
     }
 
+    /**
+     * Called when stop button is pressed. Stops the simulation so that a new simulation is started when the start button is pressed next.
+     * @param actionEvent
+     */
     public void onStopButtonAction(ActionEvent actionEvent) {
         pauseButton.setDisable(true);
         stopButton.setDisable(true);

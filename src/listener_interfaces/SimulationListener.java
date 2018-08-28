@@ -1,7 +1,8 @@
 package listener_interfaces;
 
 /**
- * A listener interface for function related to
+ * An interface to listen for completed rounds of simulation
+ * @see model.SimulationHandler
  */
 public interface SimulationListener {
     void onSimulationRoundComplete();

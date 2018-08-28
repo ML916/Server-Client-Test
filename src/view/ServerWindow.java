@@ -15,8 +15,16 @@ import java.io.IOException;
 
 import static model.SimulationHandler.SimulationStatus.*;
 
+/**
+ * ServerWindow is the start of the application
+ */
 public class ServerWindow extends Application {
 
+    /**
+     * Loads the GUI from serverwindow.fxml, initiates a SimulationHandler, Server and then sends them all to the ServerController
+     * @param primaryStage
+     * @throws Exception
+     */
     @Override
     public void start(Stage primaryStage) throws Exception{
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("serverwindow.fxml"));

@@ -31,12 +31,21 @@ public class Pedestrian implements Serializable {
         Pedestrian.numberOfPedestrians++;
     }
 
+    /**
+     * Initiates a Pedestrian object on the given x and y coordinates
+     * @param x
+     * @param y
+     */
     public Pedestrian(double x, double y){
         this();
         this.x = x;
         this.y = y;
     }
 
+    /**
+     * Initiates a Pedestrian object on a random side of the corridor
+     * @param corridor
+     */
     public Pedestrian(Corridor corridor){
         this();
         Random random = new Random();
@@ -48,6 +57,10 @@ public class Pedestrian implements Serializable {
         this.y = random.nextInt((int) corridor.getHeight());
     }
 
+    /**
+     * Sets the default movement speed depending on a given direction
+     * @return The default movement speed in a given direction
+     */
     private double setDefaultMovement(){
         switch(DIRECTION){
             case LEFT:
@@ -63,6 +76,11 @@ public class Pedestrian implements Serializable {
         in.defaultReadObject();
     }
 
+    /**
+     * A Pedestrian object is equal to another Pedestrian if the ID is equal
+     * @param obj Object to compare the pedestrian with
+     * @return Whether the ID is equal or not
+     */
     @Override
     public boolean equals(Object obj) {
         if(obj == null){
@@ -80,6 +98,10 @@ public class Pedestrian implements Serializable {
         }
     }
 
+    /**
+     * Moves a pedestrian within the corridor
+     * @param corridor
+     */
     public void move(Corridor corridor){
         if (!hasReachedGoal) {
             this.perception = new Perception(corridor);
@@ -90,6 +112,11 @@ public class Pedestrian implements Serializable {
         }
     }
 
+    /**
+     * Checks if the Pedestrian object has reached its destination within the Corridor.
+     * @param corridor The corridor the pedestrian is located in
+     * @return true or false, depending on if the pedestrian has reached its goal
+     */
     private boolean goalCheck(Corridor corridor){
         switch (DIRECTION){
             case LEFT:
@@ -107,6 +134,9 @@ public class Pedestrian implements Serializable {
         return false;
     }
 
+    /**
+     * Calculates all forces affecting the Pedestrian
+     */
     private void calculateSocialForce() {
         forcesOnXAxis = 0;
         forcesOnYAxis = 0;
@@ -118,6 +148,12 @@ public class Pedestrian implements Serializable {
         forcesFromWalls(distanceToUpperWall,distanceToLowerWall);
     }
 
+    /**
+     * Calculates social forces affecting the Pedestrian from another pedestrian object.
+     * socialForce will be pushed in the opposite direction of otherPedestrian, if DIRECTION is different.
+     * If the otherPedestrian is headed in the same direction it will either slow down or speed up this Pedestrian, depending on if it is ahead or behind this Pedestrian.
+     * @param otherPedestrian Another pedestrian affecting this pedestrian
+     */
     private void forceFromOtherPedestrian(Pedestrian otherPedestrian){
         if (!this.equals(otherPedestrian)) {
             double distanceX = Math.abs(otherPedestrian.getX() - this.x);
@@ -181,6 +217,11 @@ public class Pedestrian implements Serializable {
         }
     }
 
+    /**
+     * Calculates social force from the walls of the corridor so that the pedestrian does not walk into the wall.
+     * @param distanceToUpperWall Distance to upper wall of the corridor
+     * @param distanceToLowerWall Distance to lower wall of the corridor
+     */
     private void forcesFromWalls(double distanceToUpperWall, double distanceToLowerWall){
         if(distanceToUpperWall < 10){
             forcesOnYAxis += distanceToUpperWall/4 + 0.5;
@@ -229,7 +270,7 @@ public class Pedestrian implements Serializable {
         }
 
         private void initPerception(Corridor corridor){
-            for (Pedestrian p:corridor.pedestrianList()) {
+            for (Pedestrian p:corridor.getPedestrianList()) {
                 if(Math.sqrt(Math.pow(x - p.getX(),2)+Math.pow(y - p.getY(),2)) <= perceptionRadius){
                     pedestrians.add(p);
                 }
@@ -237,6 +278,9 @@ public class Pedestrian implements Serializable {
         }
     }
 
+    /**
+     * Direction is an enum representing whether the pedestrian is heading left or right in the corridor
+     */
     public enum Direction {
         LEFT, RIGHT;
 
